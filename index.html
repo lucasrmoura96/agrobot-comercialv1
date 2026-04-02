@@ -128,6 +128,10 @@
   .msg.user .msg-avatar{background:var(--navy-light);color:var(--text);}
   .msg-content{flex:1;min-width:0;}
   .msg-bubble{padding:10px 16px;border-radius:14px;font-size:14px;line-height:1.58;display:block;max-width:100%;word-wrap:break-word;overflow-wrap:break-word;}
+  .msg-bubble table{width:100%;border-collapse:collapse;margin:10px 0;font-size:13px;}
+  .msg-bubble th{background:rgba(0,230,100,.12);color:var(--green);font-weight:700;padding:8px 12px;text-align:left;border:1px solid var(--border);}
+  .msg-bubble td{padding:7px 12px;border:1px solid var(--border);color:var(--text);vertical-align:top;}
+  .msg-bubble tr:nth-child(even) td{background:rgba(255,255,255,.02);}
   .msg.agent .msg-bubble{background:var(--navy-card);border:1px solid var(--border);border-top-left-radius:4px;}
   .msg.user .msg-bubble{background:rgba(0,230,100,.1);border:1px solid rgba(0,230,100,.2);border-top-right-radius:4px;}
   .msg-time{font-size:10.5px;color:var(--text-muted);margin-top:5px;opacity:.65;}
@@ -710,6 +714,16 @@ function appendTyping() {
 function removeTyping() { document.getElementById('typing-indicator')?.remove(); }
 
 function fmt(text) {
+  // Tabelas markdown
+  text = text.replace(/((^\|.+\|\n?)+)/gm, block => {
+    const rows = block.trim().split('\n');
+    const isSep = r => /^\|[\s\-|:]+\|$/.test(r.trim());
+    const parseRow = (r, tag) =>
+      '<tr>' + r.split('|').slice(1,-1).map(c => `<${tag}>${c.trim()}</${tag}>`).join('') + '</tr>';
+    let html = '<table><thead>' + parseRow(rows[0],'th') + '</thead><tbody>';
+    rows.slice(1).forEach(row => { if (!isSep(row)) html += parseRow(row,'td'); });
+    return html + '</tbody></table>';
+  });
   return text
     .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
     .replace(/\*(.*?)\*/g,'<em>$1</em>')
