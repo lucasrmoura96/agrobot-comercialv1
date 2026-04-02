@@ -1,0 +1,999 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#07111f">
+<meta name="description" content="AgroBot — Suporte Comercial Agroadvance">
+<title>AgroBot - Suporte Comercial</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green:#00E664; --green-bright:#00ff78; --green-dim:#00b34e;
+    --navy:#07111f; --navy-mid:#0c1d35; --navy-card:#0f2442; --navy-light:#183554;
+    --text:#ddeeff; --text-muted:#6b92b8;
+    --border:rgba(0,230,100,.13); --border-hover:rgba(0,230,100,.32);
+    --radius:14px; --ease:cubic-bezier(.4,0,.2,1);
+  }
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+  html{font-size:16px;}
+  body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--navy);color:var(--text);min-height:100vh;overflow:hidden;-webkit-font-smoothing:antialiased;}
+
+  /* ── BG ─── */
+  .bg-mesh{position:fixed;inset:0;z-index:0;pointer-events:none;
+    background:radial-gradient(ellipse 70% 60% at 85% 5%,rgba(0,230,100,.06) 0%,transparent 55%),
+               radial-gradient(ellipse 50% 70% at 5% 85%,rgba(0,60,180,.08) 0%,transparent 55%),
+               radial-gradient(ellipse 40% 40% at 50% 50%,rgba(0,30,80,.04) 0%,transparent 70%),var(--navy);}
+  .bg-mesh::after{content:'';position:absolute;inset:0;
+    background-image:repeating-linear-gradient(0deg,transparent,transparent 39px,rgba(255,255,255,.012) 40px),
+                     repeating-linear-gradient(90deg,transparent,transparent 39px,rgba(255,255,255,.012) 40px);
+    mask-image:radial-gradient(ellipse 90% 90% at 50% 50%,#000 30%,transparent 100%);
+    -webkit-mask-image:radial-gradient(ellipse 90% 90% at 50% 50%,#000 30%,transparent 100%);}
+
+  /* ── LOGIN ─── */
+  #login-screen{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;background:var(--navy);}
+  #login-screen::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 60% at 50% 50%,rgba(0,230,100,.04) 0%,transparent 70%);}
+  .login-box{position:relative;z-index:1;background:linear-gradient(160deg,rgba(15,36,66,.97) 0%,rgba(12,29,53,.99) 100%);border:1px solid rgba(0,230,100,.18);border-radius:24px;padding:clamp(32px,5vw,52px) clamp(24px,6vw,48px);width:min(440px,calc(100vw - 32px));box-shadow:0 0 0 1px rgba(0,0,0,.3),0 32px 80px rgba(0,0,0,.55),0 0 64px rgba(0,230,100,.05);animation:fadeUp .45s var(--ease) both;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+  .login-logo{display:flex;align-items:center;gap:12px;margin-bottom:40px;}
+  .login-logo .dot{width:46px;height:46px;border-radius:50%;overflow:hidden;flex-shrink:0;box-shadow:0 0 0 2px rgba(0,230,100,.22),0 4px 16px rgba(0,0,0,.4);}
+  .login-logo .dot img{width:100%;height:100%;object-fit:cover;}
+  .login-logo span{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:17px;letter-spacing:-.2px;}
+  .login-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:28px;line-height:1.15;margin-bottom:6px;letter-spacing:-.4px;}
+  .login-sub{color:var(--text-muted);font-size:14px;margin-bottom:36px;}
+  .field{margin-bottom:18px;}
+  .field label{display:block;font-size:11px;font-weight:700;color:var(--text-muted);margin-bottom:7px;letter-spacing:.9px;text-transform:uppercase;}
+  .field input{width:100%;padding:14px 16px;background:rgba(24,53,84,.55);border:1px solid rgba(255,255,255,.08);border-radius:11px;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;outline:none;transition:border-color .2s var(--ease),box-shadow .2s var(--ease);}
+  .field input:focus{border-color:rgba(0,230,100,.5);box-shadow:0 0 0 3px rgba(0,230,100,.09);}
+  .field input::placeholder{color:rgba(107,146,184,.55);}
+  .btn-login{width:100%;padding:15px;background:linear-gradient(135deg,var(--green) 0%,var(--green-dim) 100%);color:var(--navy);border:none;border-radius:11px;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:15px;letter-spacing:.3px;margin-top:10px;transition:opacity .2s,transform .12s,box-shadow .2s;box-shadow:0 4px 24px rgba(0,230,100,.3);}
+  .btn-login:hover{opacity:.92;box-shadow:0 6px 32px rgba(0,230,100,.42);}
+  .btn-login:active{transform:scale(.98);}
+  .login-error{color:#ff7070;font-size:13px;margin-top:12px;display:none;text-align:center;background:rgba(255,80,80,.08);padding:9px 14px;border-radius:9px;border:1px solid rgba(255,80,80,.15);}
+
+  /* ── APP ─── */
+  #app{display:none;height:100vh;position:relative;z-index:1;}
+
+  /* ── SIDEBAR ─── */
+  .sidebar{position:fixed;left:0;top:0;bottom:0;width:264px;background:var(--navy-mid);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:10;}
+  .sidebar-header{padding:22px 18px 16px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,rgba(0,230,100,.025) 0%,transparent 100%);}
+  .sidebar-logo{display:flex;align-items:center;gap:10px;margin-bottom:5px;}
+  .sidebar-logo .dot{width:36px;height:36px;border-radius:10px;overflow:hidden;flex-shrink:0;background:transparent;box-shadow:0 0 0 1px rgba(0,230,100,.2),0 2px 8px rgba(0,0,0,.25);}
+  .sidebar-logo .dot img{width:100%;height:100%;object-fit:contain;}
+  .sidebar-logo span{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:14px;letter-spacing:.3px;}
+  .sidebar-tagline{font-size:10.5px;color:var(--text-muted);margin-left:42px;font-weight:500;letter-spacing:.3px;}
+  .sidebar-nav{padding:14px 10px;flex:1;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(24,53,84,.8) transparent;}
+  .sidebar-nav::-webkit-scrollbar{width:3px;}
+  .sidebar-nav::-webkit-scrollbar-thumb{background:var(--navy-light);border-radius:3px;}
+  .nav-section{margin-bottom:22px;}
+  .nav-label{font-size:10px;font-weight:700;color:var(--text-muted);letter-spacing:1.2px;text-transform:uppercase;padding:0 10px;margin-bottom:6px;opacity:.7;}
+  .nav-btn{display:flex;align-items:center;gap:10px;width:100%;padding:10px 12px;border-radius:10px;background:none;border:none;color:var(--text);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-size:13.5px;font-weight:400;text-align:left;transition:background .15s var(--ease),color .15s;margin-bottom:2px;position:relative;}
+  .nav-btn:hover{background:rgba(255,255,255,.05);}
+  .nav-btn.active{background:rgba(0,230,100,.1);color:var(--green);font-weight:600;}
+  .nav-btn.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:18px;background:var(--green);border-radius:0 3px 3px 0;box-shadow:0 0 8px rgba(0,230,100,.55);}
+  .nav-btn svg{width:16px;height:16px;flex-shrink:0;opacity:.6;transition:opacity .15s;}
+  .nav-btn.active svg{opacity:1;}
+  .hist-item{display:flex;align-items:center;gap:8px;padding:7px 12px;border-radius:8px;cursor:pointer;font-size:12.5px;color:var(--text-muted);transition:all .15s var(--ease);margin-bottom:2px;}
+  .hist-item:hover{background:rgba(255,255,255,.04);color:var(--text);}
+  .hist-item svg{width:12px;height:12px;flex-shrink:0;opacity:.6;}
+  .hist-item span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .sidebar-footer{padding:14px 10px;border-top:1px solid var(--border);background:linear-gradient(0deg,rgba(0,0,0,.12) 0%,transparent 100%);}
+  .user-chip{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.04);}
+  .user-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--green) 0%,#00a854 100%);display:grid;place-items:center;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:11px;color:var(--navy);flex-shrink:0;box-shadow:0 0 0 2px rgba(0,230,100,.2);}
+  .user-info{flex:1;min-width:0;}
+  .user-name{font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .user-role{font-size:10.5px;color:var(--text-muted);margin-top:1px;}
+  .btn-logout{background:none;border:none;cursor:pointer;color:var(--text-muted);padding:6px;border-radius:7px;transition:color .18s,background .18s;flex-shrink:0;}
+  .btn-logout:hover{color:#ff6b6b;background:rgba(255,80,80,.1);}
+  .btn-logout svg{width:15px;height:15px;display:block;}
+
+  /* ── MAIN ─── */
+  .main{margin-left:264px;height:100vh;display:flex;flex-direction:column;}
+  .panel{display:none;flex:1;flex-direction:column;height:100%;overflow:hidden;}
+  .panel.active{display:flex;}
+
+  /* ── CHAT HEADER ─── */
+  .chat-header{padding:18px 28px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:linear-gradient(180deg,rgba(0,230,100,.02) 0%,transparent 100%);}
+  .chat-header-left{display:flex;align-items:center;gap:14px;min-width:0;overflow:hidden;}
+  .status-dot{width:9px;height:9px;border-radius:50%;background:var(--green);box-shadow:0 0 0 2px rgba(0,230,100,.22),0 0 10px rgba(0,230,100,.55);animation:pulse 2.4s var(--ease) infinite;flex-shrink:0;}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.82)}}
+  .chat-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:18px;letter-spacing:-.3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .chat-subtitle{font-size:11.5px;color:var(--text-muted);margin-top:2px;}
+  .btn-new-chat{display:flex;align-items:center;gap:7px;padding:8px 18px;background:rgba(0,230,100,.08);border:1px solid rgba(0,230,100,.2);border-radius:9px;color:var(--green);font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .18s var(--ease);white-space:nowrap;}
+  .btn-new-chat:hover{background:rgba(0,230,100,.16);border-color:rgba(0,230,100,.35);transform:translateY(-1px);}
+  .btn-new-chat svg{width:14px;height:14px;}
+
+  /* ── MESSAGES ─── */
+  .messages-area{flex:1;overflow-y:auto;padding:20px 32px;display:flex;flex-direction:column;gap:10px;scroll-behavior:smooth;scrollbar-width:thin;scrollbar-color:rgba(24,53,84,.8) transparent;}
+  .messages-area::-webkit-scrollbar{width:4px;}
+  .messages-area::-webkit-scrollbar-thumb{background:var(--navy-light);border-radius:4px;}
+
+  /* ── WELCOME ─── */
+  .welcome-block{text-align:center;padding:52px 20px;max-width:560px;margin:auto;animation:fadeUp .5s var(--ease) both;}
+  .welcome-icon{width:72px;height:72px;border-radius:20px;background:linear-gradient(135deg,var(--green) 0%,#00a854 100%);display:grid;place-items:center;margin:0 auto 24px;box-shadow:0 0 0 1px rgba(0,230,100,.3),0 16px 48px rgba(0,230,100,.22),0 4px 16px rgba(0,230,100,.15);}
+  .welcome-icon svg{width:36px;height:36px;}
+  .welcome-block h2{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:26px;margin-bottom:10px;letter-spacing:-.4px;}
+  .welcome-block p{color:var(--text-muted);font-size:14.5px;line-height:1.65;max-width:420px;margin:0 auto;}
+  .quick-chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:24px;}
+  .chip{padding:8px 16px;background:var(--navy-card);border:1px solid var(--border);border-radius:20px;font-size:13px;cursor:pointer;transition:all .2s var(--ease);color:var(--text-muted);}
+  .chip:hover{border-color:var(--green);color:var(--green);background:rgba(0,230,100,.07);transform:translateY(-1px);}
+
+  /* ── MESSAGES ─── */
+  .msg{display:flex;gap:12px;animation:msgIn .28s var(--ease) both;max-width:840px;width:100%;}
+  @keyframes msgIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+  .msg.user{flex-direction:row-reverse;margin-left:auto;}
+  .msg-avatar{width:34px;height:34px;border-radius:50%;flex-shrink:0;display:grid;place-items:center;font-size:10px;font-weight:800;font-family:'Plus Jakarta Sans',sans-serif;margin-top:2px;}
+  .msg.agent .msg-avatar{background:transparent;overflow:hidden;box-shadow:0 0 0 2px rgba(0,230,100,.2);}
+  .msg.agent .msg-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;}
+  .msg.user .msg-avatar{background:var(--navy-light);color:var(--text);}
+  .msg-content{flex:1;min-width:0;}
+  .msg-bubble{padding:10px 16px;border-radius:14px;font-size:14px;line-height:1.58;display:block;max-width:100%;word-wrap:break-word;overflow-wrap:break-word;}
+  .msg.agent .msg-bubble{background:var(--navy-card);border:1px solid var(--border);border-top-left-radius:4px;}
+  .msg.user .msg-bubble{background:rgba(0,230,100,.1);border:1px solid rgba(0,230,100,.2);border-top-right-radius:4px;}
+  .msg-time{font-size:10.5px;color:var(--text-muted);margin-top:5px;opacity:.65;}
+  .msg.user .msg-time{text-align:right;}
+  .typing-dots{display:flex;gap:5px;align-items:center;padding:5px 2px;}
+  .typing-dots span{width:7px;height:7px;border-radius:50%;background:var(--text-muted);animation:td 1.3s var(--ease) infinite;}
+  .typing-dots span:nth-child(2){animation-delay:.18s}
+  .typing-dots span:nth-child(3){animation-delay:.36s}
+  @keyframes td{0%,80%,100%{transform:scale(.65);opacity:.3}40%{transform:scale(1);opacity:1}}
+
+  /* ── INPUT ─── */
+  .chat-input-area{padding:14px 28px 20px;flex-shrink:0;background:linear-gradient(0deg,rgba(7,17,31,.85) 0%,transparent 100%);}
+  .input-box{display:flex;align-items:flex-end;gap:10px;background:var(--navy-card);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:12px 12px 12px 16px;transition:border-color .2s var(--ease),box-shadow .2s var(--ease);}
+  .input-box:focus-within{border-color:rgba(0,230,100,.35);box-shadow:0 0 0 3px rgba(0,230,100,.07);}
+  #chat-input{flex:1;background:none;border:none;outline:none;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:14.5px;resize:none;max-height:130px;line-height:1.55;scrollbar-width:none;padding-top:2px;}
+  #chat-input::placeholder{color:rgba(107,146,184,.6);}
+  #chat-input::-webkit-scrollbar{display:none;}
+  .btn-send{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--green) 0%,var(--green-dim) 100%);border:none;cursor:pointer;display:grid;place-items:center;flex-shrink:0;transition:opacity .18s,transform .12s,box-shadow .18s;box-shadow:0 2px 14px rgba(0,230,100,.28);}
+  .btn-send:hover{opacity:.9;box-shadow:0 4px 20px rgba(0,230,100,.42);transform:translateY(-1px);}
+  .btn-send:active{transform:scale(.93);}
+  .btn-send:disabled{opacity:.3;cursor:not-allowed;transform:none !important;box-shadow:none;}
+  .btn-send svg{width:16px;height:16px;}
+  .input-hint{font-size:11px;color:var(--text-muted);text-align:center;margin-top:8px;opacity:.55;}
+
+  /* ── PANEL HEADER ─── */
+  .panel-header{padding:22px 28px;border-bottom:1px solid var(--border);flex-shrink:0;background:linear-gradient(180deg,rgba(0,230,100,.02) 0%,transparent 100%);}
+  .panel-header h1{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:22px;letter-spacing:-.3px;}
+  .panel-header p{color:var(--text-muted);font-size:13px;margin-top:5px;}
+  .search-bar{padding:16px 28px 8px;flex-shrink:0;}
+  .search-input-wrap{position:relative;}
+  .search-input-wrap svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--text-muted);pointer-events:none;}
+  .search-input-wrap input{width:100%;padding:12px 16px 12px 44px;background:var(--navy-card);border:1px solid var(--border);border-radius:11px;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;outline:none;transition:border-color .2s var(--ease),box-shadow .2s var(--ease);}
+  .search-input-wrap input:focus{border-color:rgba(0,230,100,.4);box-shadow:0 0 0 3px rgba(0,230,100,.07);}
+  .search-input-wrap input::placeholder{color:rgba(107,146,184,.55);}
+
+  /* ── PRODUCTS ─── */
+  .products-grid{flex:1;overflow-y:auto;padding:16px 28px 28px;display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px;align-content:start;scrollbar-width:thin;scrollbar-color:rgba(24,53,84,.8) transparent;}
+  .products-grid::-webkit-scrollbar{width:4px;}
+  .products-grid::-webkit-scrollbar-thumb{background:var(--navy-light);border-radius:4px;}
+  .product-card{background:var(--navy-card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;cursor:default;transition:border-color .2s var(--ease),transform .2s var(--ease),box-shadow .2s var(--ease);display:flex;flex-direction:column;}
+  .product-card:hover{border-color:var(--border-hover);transform:translateY(-2px);box-shadow:0 12px 40px rgba(0,0,0,.35);}
+  .product-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.4px;margin-bottom:14px;width:fit-content;}
+  .badge-imersao{background:rgba(0,230,100,.1);color:var(--green);border:1px solid rgba(0,230,100,.2);}
+  .badge-mba{background:rgba(100,140,255,.1);color:#8bb0ff;border:1px solid rgba(100,140,255,.2);}
+  .badge-pos{background:rgba(255,180,0,.1);color:#ffd060;border:1px solid rgba(255,180,0,.2);}
+  .badge-evento{background:rgba(255,80,180,.1);color:#ff90d0;border:1px solid rgba(255,80,180,.2);}
+  .product-name{font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:15px;margin-bottom:7px;line-height:1.3;overflow-wrap:break-word;word-break:break-word;}
+  .product-desc{font-size:13px;color:var(--text-muted);line-height:1.55;margin-bottom:14px;flex:1;}
+  .product-meta{display:flex;flex-wrap:wrap;gap:6px;}
+  .meta-tag{padding:4px 10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:6px;font-size:11px;color:var(--text-muted);}
+  .btn-ask-product{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:16px;padding:9px 14px;border-radius:9px;background:rgba(0,230,100,.07);border:1px solid rgba(0,230,100,.18);color:var(--green);font-size:12.5px;font-weight:500;cursor:pointer;transition:all .18s var(--ease);width:100%;}
+  .btn-ask-product:hover{background:rgba(0,230,100,.15);border-color:rgba(0,230,100,.35);}
+  .btn-ask-product svg{width:13px;height:13px;}
+
+  /* ── OBJECTIONS ─── */
+  .obj-list{flex:1;overflow-y:auto;padding:16px 28px 28px;display:flex;flex-direction:column;gap:8px;scrollbar-width:thin;scrollbar-color:rgba(24,53,84,.8) transparent;}
+  .obj-list::-webkit-scrollbar{width:4px;}
+  .obj-list::-webkit-scrollbar-thumb{background:var(--navy-light);border-radius:4px;}
+  .obj-card{background:var(--navy-card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:border-color .2s var(--ease),box-shadow .2s;}
+  .obj-card:hover{border-color:rgba(0,230,100,.22);}
+  .obj-card.open{border-color:rgba(0,230,100,.3);box-shadow:0 4px 24px rgba(0,0,0,.25);}
+  .obj-q{padding:15px 20px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:12px;transition:background .15s;}
+  .obj-q:hover{background:rgba(255,255,255,.025);}
+  .obj-q-num{width:28px;height:28px;border-radius:8px;background:rgba(0,230,100,.1);color:var(--green);display:grid;place-items:center;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:11.5px;flex-shrink:0;transition:background .2s,color .2s;}
+  .obj-card.open .obj-q-num{background:var(--green);color:var(--navy);}
+  .obj-q-text{font-size:14px;font-weight:500;flex:1;line-height:1.4;}
+  .obj-chevron{width:16px;height:16px;color:var(--text-muted);transition:transform .25s var(--ease),color .2s;flex-shrink:0;}
+  .obj-card.open .obj-chevron{transform:rotate(180deg);color:var(--green);}
+  .obj-answer{padding:0 20px;max-height:0;overflow:hidden;transition:max-height .35s var(--ease),padding .3s var(--ease);font-size:14px;color:var(--text-muted);line-height:1.78;}
+  .obj-card.open .obj-answer{max-height:500px;padding:16px 20px 20px;border-top:1px solid var(--border);}
+  .copy-resp{display:inline-flex;align-items:center;gap:6px;margin-top:14px;padding:7px 14px;background:rgba(0,230,100,.07);border:1px solid rgba(0,230,100,.18);border-radius:8px;font-size:12px;font-weight:500;color:var(--green);cursor:pointer;transition:all .18s var(--ease);}
+  .copy-resp:hover{background:rgba(0,230,100,.16);}
+  .refresh-resp{display:inline-flex;align-items:center;justify-content:center;margin-top:14px;margin-left:6px;padding:7px 10px;background:rgba(107,146,184,.07);border:1px solid rgba(107,146,184,.18);border-radius:8px;color:var(--text-muted);cursor:pointer;transition:all .18s var(--ease);}
+  .refresh-resp:hover{background:rgba(107,146,184,.15);color:var(--text);border-color:rgba(107,146,184,.35);}
+  .refresh-resp svg{width:13px;height:13px;}
+  .obj-actions{display:flex;align-items:center;flex-wrap:wrap;gap:0;}
+  .btn-add-obj{display:flex;align-items:center;gap:6px;padding:6px 14px;background:rgba(0,230,100,.07);border:1px solid rgba(0,230,100,.2);border-radius:8px;color:var(--green);font-size:12.5px;font-weight:600;cursor:pointer;transition:all .18s var(--ease);white-space:nowrap;}
+  .btn-add-obj:hover{background:rgba(0,230,100,.16);}
+  .panel-header-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
+  .obj-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;display:flex;align-items:center;justify-content:center;animation:fadeIn .2s ease both;}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  .obj-modal{background:var(--navy-mid);border:1px solid var(--border);border-radius:18px;padding:28px;width:min(480px,calc(100vw - 32px));box-shadow:0 32px 80px rgba(0,0,0,.55);animation:fadeUp .25s var(--ease) both;}
+  .obj-modal h3{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:17px;margin-bottom:18px;letter-spacing:-.2px;}
+  .obj-modal label{display:block;font-size:11px;font-weight:700;color:var(--text-muted);margin-bottom:6px;letter-spacing:.8px;text-transform:uppercase;}
+  .obj-modal input,.obj-modal textarea{width:100%;background:var(--navy-card);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:13.5px;padding:10px 14px;outline:none;transition:border-color .2s;box-sizing:border-box;}
+  .obj-modal textarea{resize:vertical;min-height:80px;line-height:1.5;}
+  .obj-modal input:focus,.obj-modal textarea:focus{border-color:rgba(0,230,100,.4);}
+  .obj-modal-field{margin-bottom:16px;}
+  .obj-modal-btns{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;}
+  .btn-modal-cancel{padding:9px 18px;background:none;border:1px solid var(--border);border-radius:9px;color:var(--text-muted);font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;cursor:pointer;transition:all .18s;}
+  .btn-modal-cancel:hover{border-color:rgba(255,255,255,.2);color:var(--text);}
+  .btn-modal-save{padding:9px 20px;background:var(--green);border:none;border-radius:9px;color:var(--navy);font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:opacity .18s;}
+  .btn-modal-save:hover{opacity:.88;}
+  .obj-card-custom .obj-q-num{background:rgba(255,180,0,.1);color:#ffd060;}
+  .obj-card-custom.open .obj-q-num{background:#ffd060;color:var(--navy);}
+  .btn-del-obj{display:inline-flex;align-items:center;justify-content:center;margin-top:14px;margin-left:6px;padding:7px 10px;background:rgba(255,80,80,.07);border:1px solid rgba(255,80,80,.15);border-radius:8px;color:rgba(255,120,120,.7);cursor:pointer;transition:all .18s var(--ease);}
+  .btn-del-obj:hover{background:rgba(255,80,80,.15);color:#ff7070;}
+  .btn-del-obj svg{width:13px;height:13px;}
+
+  /* ── HISTORY ─── */
+  .hist-full-list{flex:1;overflow-y:auto;padding:16px 28px 28px;display:flex;flex-direction:column;gap:8px;scrollbar-width:thin;scrollbar-color:rgba(24,53,84,.8) transparent;}
+  .hist-full-list::-webkit-scrollbar{width:4px;}
+  .hist-full-list::-webkit-scrollbar-thumb{background:var(--navy-light);border-radius:4px;}
+  .hist-full-item{padding:14px 18px;background:var(--navy-card);border:1px solid var(--border);border-radius:12px;cursor:pointer;transition:border-color .18s var(--ease),transform .18s var(--ease),box-shadow .18s;display:flex;align-items:center;gap:12px;}
+  .hist-full-item:hover{border-color:rgba(0,230,100,.25);transform:translateX(3px);box-shadow:0 4px 20px rgba(0,0,0,.2);}
+  .hist-full-icon{width:38px;height:38px;border-radius:10px;background:rgba(0,230,100,.08);border:1px solid rgba(0,230,100,.1);display:grid;place-items:center;flex-shrink:0;}
+  .hist-full-icon svg{width:16px;height:16px;color:var(--green);}
+  .hist-full-text{flex:1;min-width:0;}
+  .hist-full-title{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .hist-full-date{font-size:11.5px;color:var(--text-muted);margin-top:2px;}
+  .hist-full-msgs{font-size:11.5px;color:var(--text-muted);flex-shrink:0;white-space:nowrap;background:rgba(255,255,255,.05);padding:3px 10px;border-radius:12px;}
+
+  /* ── TOAST ─── */
+  .toast{position:fixed;bottom:28px;right:28px;z-index:999;padding:11px 20px;background:var(--green);color:var(--navy);border-radius:10px;font-size:13px;font-weight:700;transform:translateY(16px) scale(.97);opacity:0;pointer-events:none;transition:transform .25s var(--ease),opacity .25s var(--ease);box-shadow:0 4px 20px rgba(0,230,100,.4);}
+  .toast.show{transform:translateY(0) scale(1);opacity:1;}
+
+  /* ── ERROR ─── */
+  .msg-error .msg-bubble{background:rgba(255,70,70,.09);border-color:rgba(255,70,70,.22);color:#ffaaaa;}
+</style>
+</head>
+<body>
+<div class="bg-mesh"></div>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="dot"><img id="logo-img" src="data:image/png;base64,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" alt="Agroadvance" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"/></div>
+      <span>AGROADVANCE</span>
+    </div>
+    <div class="login-title">AgroBot</div>
+    <div class="login-sub">Agente de Suporte Comercial</div>
+    <div class="field"><label>Usuário</label><input type="text" id="login-user" placeholder="seu nome" autocomplete="off"/></div>
+    <div class="field"><label>Senha</label><input type="password" id="login-pass" placeholder="••••••••" autocomplete="off"/></div>
+    <button class="btn-login" onclick="doLogin()">Entrar</button>
+    <div class="login-error" id="login-error">Usuário ou senha incorretos</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <div class="dot"><img src="data:image/png;base64,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" alt="Agroadvance" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"/></div>
+        <span>AGROADVANCE</span>
+      </div>
+      <div class="sidebar-tagline">Suporte Comercial</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">
+        <div class="nav-label">Menu</div>
+        <button class="nav-btn active" onclick="setPanel('chat',this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Chat com o Agente
+        </button>
+        <button class="nav-btn" onclick="setPanel('produtos',this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Produtos
+        </button>
+        <button class="nav-btn" onclick="setPanel('objecoes',this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>Objeções
+        </button>
+        <button class="nav-btn" onclick="setPanel('historico',this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Histórico
+        </button>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Conversas Recentes</div>
+        <div id="sidebar-hist"></div>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-chip">
+        <div class="user-avatar" id="user-avatar">?</div>
+        <div class="user-info">
+          <div class="user-name" id="user-name-display">—</div>
+          <div class="user-role">Time Comercial</div>
+        </div>
+        <button class="btn-logout" onclick="doLogout()" title="Sair">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+    <!-- CHAT -->
+    <div class="panel active" id="panel-chat">
+      <div class="chat-header">
+        <div class="chat-header-left">
+          <div class="status-dot"></div>
+          <div>
+            <div class="chat-title">AgroBot</div>
+            <div class="chat-subtitle">Agente de Suporte Comercial</div>
+          </div>
+        </div>
+        <button class="btn-new-chat" onclick="newChat()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Nova conversa
+        </button>
+      </div>
+      <div class="messages-area" id="messages">
+        <div class="welcome-block" id="welcome-block">
+          <div class="welcome-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#0a1628" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><circle cx="9" cy="10" r="1" fill="#0a1628"/><circle cx="12" cy="10" r="1" fill="#0a1628"/><circle cx="15" cy="10" r="1" fill="#0a1628"/></svg></div>
+          <h2>AgroBot</h2>
+          <p>Seu suporte comercial em tempo real. Tire dúvidas dos clientes sobre cursos, MBAs, pós-graduações e eventos — com argumentos precisos e respostas prontas para objeções.</p>
+          <div class="quick-chips">
+            <div class="chip" onclick="sendChip(this)">Quais produtos temos disponíveis?</div>
+            <div class="chip" onclick="sendChip(this)">Como vender o MBA IAL?</div>
+            <div class="chip" onclick="sendChip(this)">Como rebater "é muito caro"?</div>
+            <div class="chip" onclick="sendChip(this)">Para quem é o MBA em Agronegócios?</div>
+            <div class="chip" onclick="sendChip(this)">O que é a Imersão DNA?</div>
+          </div>
+        </div>
+      </div>
+      <div class="chat-input-area">
+        <div class="input-box">
+          <textarea id="chat-input" rows="1" placeholder="Pergunte sobre produtos, argumentos, objeções..."></textarea>
+          <button class="btn-send" onclick="sendMessage()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#0a1628" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </div>
+        <div class="input-hint">Enter para enviar · Shift+Enter para nova linha</div>
+      </div>
+    </div>
+
+    <!-- PRODUTOS -->
+    <div class="panel" id="panel-produtos">
+      <div class="panel-header"><h1>Produtos</h1><p>Todos os cursos, MBAs, pós-graduações e eventos da Agroadvance</p></div>
+      <div class="search-bar">
+        <div class="search-input-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" placeholder="Buscar produto..." oninput="filterProducts(this.value)"/>
+        </div>
+      </div>
+      <div class="products-grid" id="products-grid"></div>
+    </div>
+
+    <!-- OBJEÇÕES -->
+    <div class="panel" id="panel-objecoes">
+      <div class="panel-header">
+        <div class="panel-header-row">
+          <div><h1>Respostas para Objeções</h1><p>Scripts prontos para as objeções mais comuns</p></div>
+          <button class="btn-add-obj" onclick="openAddObjModal()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Nova
+          </button>
+        </div>
+      </div>
+      <div class="obj-list" id="obj-list"></div>
+    </div>
+
+    <!-- HISTÓRICO -->
+    <div class="panel" id="panel-historico">
+      <div class="panel-header"><h1>Histórico de Conversas</h1><p>Suas conversas anteriores com o agente</p></div>
+      <div class="hist-full-list" id="hist-full-list"></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── CONFIG ─────────────────────────────────────────────────
+const WEBHOOK_URL = 'https://lucasmoura96.app.n8n.cloud/webhook/agente-comercial';
+
+const USERS = { "comercial":"agro2026","Liliane":"lili123","admin":"agro2026","beatriz":"agro2026","dayson":"agro2026" };
+
+// ── SYSTEM PROMPT COMPLETO ─────────────────────────────────
+const SYSTEM_PROMPT = `Você é o AgroBot — assistente de suporte comercial interno da AGROADVANCE, Escola de Negócios Agro.
+
+MISSÃO: Apoiar o time de vendas em tempo real, respondendo com precisão às dúvidas que os clientes trazem sobre os produtos da Agroadvance.
+
+REGRA ABSOLUTA — FIDELIDADE AO CATÁLOGO:
+Responda exclusivamente com informações contidas neste prompt. Nunca invente, suponha ou extrapole dados. Se a informação não constar aqui, responda: "Não tenho essa informação disponível. Confirme com o gestor comercial."
+
+SEU PAPEL:
+O consultor de vendas te consulta enquanto atende um cliente. Seu foco é SEMPRE o cliente — nunca pergunte sobre o consultor. Ajude a converter a dúvida do cliente em argumento de valor.
+
+PERSONALIDADE:
+Você é direto, inteligente e tem um humor leve e natural — nada forçado, nada artificial. Sabe quando soltar uma observação espirituosa para descontrair a conversa, mas nunca perde o foco no resultado. Trata o consultor como parceiro de verdade: com respeito, leveza e objetividade. Usa linguagem informal-profissional — nem robótico, nem desapontante. É o tipo de colega que todo mundo quer ao lado numa negociação: rápido, afiado e com um sorriso no canto da boca.
+
+FORMATAÇÃO: Direto ao ponto. Use **negrito** para destaques. Listas com -. Emojis moderados. Nunca use ### como cabeçalho.
+
+QUANDO PERGUNTAR SOBRE GRADE/DISCIPLINAS DE UM CURSO:
+Responda sempre com tabela no formato:
+| Módulo | Carga Horária | Disciplinas |
+|--------|--------------|-------------|
+Use **negrito** para o nome do módulo. Liste todas as disciplinas separadas por ponto-e-vírgula na célula de Disciplinas. Inclua todas as disciplinas do módulo sem omitir nenhuma.
+
+FRAMEWORK PARA OBJEÇÕES:
+1. Empatia — valide a preocupação
+2. Valor/Fato — dado concreto do produto
+3. CTA — matrícula, proposta ou ligação
+
+TODOS OS CURSOS TÊM: 360h de carga horária, 4 módulos de 90h cada, 8 aulas por módulo (3h cada), modalidade EAD com aulas ao vivo gravadas na plataforma, sem TCC.
+
+POR QUE OS ALUNOS ESCOLHEM A AGROADVANCE:
+- Conteúdo e metodologia (principal motivo)
+- Qualidade dos professores
+- Indicação de outros alunos (prova social forte)
+- Reputação da marca
+"O aluno não compra preço. Ele compra método, professor e resultado prático."
+
+========== MBAs ==========
+
+--- MBA EM INTELIGÊNCIA ARTIFICIAL NO AGRONEGÓCIO (IAL) ---
+Início: 09/02/2026 | Aulas: Segundas 19h–22h | 12 meses | Cert. Pós MEC | Sem TCC
+Evento presencial: 21/05/2026
+MÓDULOS E DISCIPLINAS:
+1. Dados e IA (90h): Arquitetura de Dados, Big Data e IA no Agronegócio; Diagnóstico Estratégico para o Uso de IA nas Corporações; IA Generativa Aplicada ao Agronegócio; Engenharia de Prompt; Arquitetura e Agentes de IA; Data Governance e LGPD; Encontro Presencial
+2. Estratégias e Aplicações no Agronegócio (90h): Sensoriamento Remoto e Análise de Dados Geoespaciais; Previsão e Gestão de Riscos Climáticos; IA: "Braço Direito" do Seguro Rural; Integração de Sistemas e Dados; Transformação Digital no Agronegócio; Inovação Aberta
+3. Habilidades de Liderança (90h): Autoconhecimento e Aprendizado Contínuo; Cultura Organizacional; People Analytics: Liderança em um Mundo Data-Driven; Competências para Alta Performance; Gestão por Fortaleza e Liderança Customizada; Gerenciamento de Conflitos; Encontro Presencial
+4. Estratégia e Finanças (90h): Conceitos de Estratégia; Planejamento Estratégico no Agro; Inovação como Pilar da Estratégia; Fundamentos Financeiros: EBITDA, Receitas, Despesas; Indicadores Financeiros, Capital de Giro, CAPEX; Projeções Financeiras
+DIFERENCIAL: Único MBA focado em liderança com IA — sem exigência de conhecimento técnico. "Esse MBA te ensina a conversar com quem é técnico e transformar IA em resultado real no agro."
+
+--- MBA EM AGRONEGÓCIOS (AGRO) ---
+Início: 21/01/2026 | Aulas: Quartas 19h–22h | 12+6 meses extensão | Cert. Pós MEC
+Metodologia diferencial: ÚNICO MBA com PBL 100% personalizado por IA.
+MÓDULOS E DISCIPLINAS:
+1. Estrutura e Cadeias do Agronegócio (90h): Cooperativismo como Motor de Desenvolvimento; Dinâmica Econômica do Agronegócio: Ciclos de Mercado e Tomada de Decisão; Competitividade no Agronegócio; Diferenciação e Posicionamento no Agro; Integração de Cadeias e Agregação de Valor; Logística e Supply Chain
+2. Estratégia Financeira e Decisões Econômicas (90h): Indicadores Financeiros; Projeções Financeiras e Planejamento de Investimentos; Como Funciona o Dinheiro no Agro?; Política Agrícola e os Bastidores do Agro; ESG no Agro: Oportunidade Real ou Desafio Comercial?; Créditos de Carbono: Monetização e Estratégia de Mercado; Aula Internacional
+3. Comercialização e Gestão de Mercado (90h): Cenário Macroeconômico para Tomada de Decisão; Gestão de Riscos no Agronegócio; Operações de Proteção de Preços; Estratégias de Acesso a Mercado; Mercado de Insumos Agrícolas; Novos Modelos de Negócios no Agro
+4. Agro do Futuro (90h): Transformação Digital no Agronegócio; Digitalização e IA na Produção Agrícola; Tecnologia e Previsão Climática; Conectividade e Automação: O Agro na Era Digital; O Futuro da Biotecnologia; Empreendedorismo e Ecossistemas de Inovação; Aula Internacional
+DIFERENCIAL: Único MBA com PBL 100% personalizado por IA. "O MBA Agro não te especializa, ele te conecta com o agro inteiro!"
+
+--- MBA EM LIDERANÇA, GESTÃO E ESTRATÉGIA (LGE) ---
+360h | Cert. Pós | EAD | Encontros presenciais
+MÓDULOS E DISCIPLINAS:
+1. Marketing e Vendas (90h): Marketing Analytics; Marketing de Produtos: Conceitos e Aplicações; Análise e Gestão de Portfólio; Pricing: Definições e Estratégias; Planejamento, Estruturação e Condução das Etapas de Negociação; Quebrando Objeções; Encontro Presencial
+2. Gestão de Processos (90h): O Sistema de Gestão + Fatores Críticos de Sucesso; Governança de Resultados e Projetos; Como Fazer a Estratégia Realmente Acontecer; Processos Estáveis, Produtos Confiáveis; Planejamento Orçamentário; Tecnologia e Gestão: Uma Combinação Poderosa!
+3. Habilidades de Liderança (90h): Autoconhecimento e Aprendizado Contínuo; Cultura Organizacional; People Analytics: Liderança em um Mundo Data-Driven; Competências para Alta Performance; Gestão por Fortaleza e Liderança Customizada; Gerenciamento de Conflitos; Encontro Presencial
+4. Estratégia e Finanças (90h): Conceitos de Estratégia; Planejamento Estratégico no Agro; Inovação como Pilar da Estratégia; Fundamentos Financeiros: EBITDA, Receitas, Despesas; Indicadores Financeiros, Capital de Giro, CAPEX; Projeções Financeiras
+
+--- MBA EM GESTÃO DE TIMES COMERCIAIS (GTC) ---
+360h | Cert. Pós | EAD | Encontros presenciais
+MÓDULOS E DISCIPLINAS:
+1. Marketing e Vendas (90h): Marketing Analytics; Marketing de Produtos; Análise e Gestão de Portfólio; Pricing; Planejamento e Condução das Etapas de Negociação; Quebrando Objeções; Encontro Presencial
+2. Construindo Times Comerciais (90h): Planejamento Comercial Estratégico: Estruturação de Metas e Execução Tática; Arquitetura de Times Comerciais: Design para Alta Performance; Como Incentivar o Time Comercial no Agronegócio ("Dobrar a Meta"); Rotinas do Time Comercial; Geração de Demanda: Estratégias de Influência; Integração Comercial Estratégica
+3. Habilidades de Liderança (90h): Autoconhecimento e Aprendizado Contínuo; Cultura Organizacional; People Analytics; Competências para Alta Performance; Gestão por Fortaleza e Liderança Customizada; Gerenciamento de Conflitos; Encontro Presencial
+4. Estratégia e Finanças (90h): Conceitos de Estratégia; Planejamento Estratégico no Agro; Inovação como Pilar da Estratégia; Fundamentos Financeiros: EBITDA, Receitas, Despesas; Indicadores Financeiros, Capital de Giro, CAPEX; Projeções Financeiras
+
+--- MBA EM GESTÃO DE PROPRIEDADES AGRÍCOLAS (GPA) ---
+DIFERENCIAL: Único MBA focado em gerir a fazenda como negócio — cobre sucessão familiar, finanças rurais e planejamento estratégico da propriedade.
+360h | Cert. Pós | EAD | Encontros presenciais
+MÓDULOS E DISCIPLINAS:
+1. Gestão de Pessoas, Governança e Sucessão (90h): Organização de Pessoas na Propriedade Rural; Gestão de Desempenho e Engajamento da Equipe; Liderança no Campo e Gestão de Conflitos; Fundamentos da Sucessão Familiar no Agronegócio; Governança em Empresas Rurais Familiares; Planejamento Sucessório e Continuidade do Negócio Rural; Encontro Presencial
+2. Mercado, Comercialização e Estratégia Tributária (90h): Inteligência de Mercado e Formação de Preços Agrícolas; Estratégias Comerciais de Commodities; Negociação da Produção com Canais de Comercialização; Gestão de Custos e Negociação de Insumos; Gestão e Eficiência Tributária no Agronegócio; Gestão Fundiária e Regularização de Terras
+3. Planejamento Estratégico e Operacional da Fazenda (90h): Planejamento Estratégico da Propriedade Rural; Planejamento Técnico e Tecnológico da Produção; Planejamento Operacional: Organização de Janelas e Recursos; Orçamento Rural e Viabilidade Econômica; Gestão por Indicadores e Uso de Dados no Agro; Fazenda do Futuro: Inovação, Sustentabilidade e Diferenciação; Encontro Presencial
+4. Gestão Financeira, Econômica e de Riscos no Agronegócio (90h): Indicadores Financeiros no Agro; Fluxo de Caixa Rural e Projeções Econômicas; Capital de Giro e Investimentos em Estrutura (CAPEX); Crédito Rural, Fontes de Financiamento e Alternativas de Mercado; Gestão de Riscos Climáticos e Operacionais; Gestão Financeira de Preços e Proteção de Margem
+
+--- MBA EM VENDAS NO AGRONEGÓCIO (VNA) ---
+Início: 27/04/2026 | Aulas: Segundas 19h–22h | 12+6 meses | 360h | Eventos: Ago/26 e Nov/26
+MÓDULOS E DISCIPLINAS:
+1. Técnicas Avançadas de Vendas (90h): Planejamento de Negociação e Vendas; Estabelecimento da Confiança e Conexão com o Cliente; SPIN Selling no Agronegócio; Lidando com Objeções; Conectando a Estratégia de Vendas com a Estratégia da Companhia: Diferenciação; Finalizando uma Venda e Fidelização de Clientes; Encontro Presencial
+2. Estratégias de Escalonamento de Vendas (90h): Organização da Agenda Comercial; Expansão Inteligente da Carteira; Gestão de Território; Key Account Management; Construindo Pontes Internas; Gestão de Dados Visando Eficiência Comercial
+3. Habilidades de Liderança (90h): Autoconhecimento e Aprendizado Contínuo; Cultura Organizacional; People Analytics; Competências para Alta Performance; Gestão por Fortaleza e Liderança Customizada; Gerenciamento de Conflitos; Encontro Presencial
+4. Estratégia e Finanças (90h): Conceitos de Estratégia; Planejamento Estratégico no Agro; Inovação como Pilar da Estratégia; Fundamentos Financeiros: EBITDA, Receitas, Despesas; Indicadores Financeiros, Capital de Giro, CAPEX; Projeções Financeiras
+
+--- MBA EM MARKETING ESTRATÉGICO NO AGRONEGÓCIO (MEA) ---
+Início: 27/04/2026 | Aulas: Segundas | 12 meses | Eventos: Ago/26 e Dez/26
+MÓDULOS E DISCIPLINAS:
+1. Marketing e Vendas (90h): Marketing Analytics; Marketing de Produtos: Conceitos e Aplicações; Análise e Gestão de Portfólio; Pricing: Definições e Estratégias; Planejamento e Condução das Etapas de Negociação; Quebrando Objeções
+2. Marketing 6.0 (90h): Introdução ao Marketing 6.0; Comportamento do Consumidor na Era Digital; Tecnologia e Inovação no Marketing 6.0; Responsabilidade Social e Sustentabilidade; Estratégias de Marketing Digital Integrado; Futuro do Marketing e Tendências Emergentes
+3. Habilidades de Liderança (90h): Autoconhecimento e Aprendizado Contínuo; Cultura Organizacional; People Analytics; Competências para Alta Performance; Gestão por Fortaleza e Liderança Customizada; Gerenciamento de Conflitos
+4. Estratégia e Finanças (90h): Conceitos de Estratégia; Planejamento Estratégico no Agro; Inovação como Pilar da Estratégia; Fundamentos Financeiros: EBITDA, Receitas, Despesas; Indicadores Financeiros, Capital de Giro, CAPEX e Fluxo de Caixa; Projeções Financeiras
+
+========== PÓS-GRADUAÇÕES ==========
+
+--- PÓS-GRADUAÇÃO EM FISIOLOGIA VEGETAL (PFV) ---
+DIFERENCIAL: Único curso que vai até hormônios vegetais avançados (brassinoesteróides, estrigolactonas, ácido jasmônico) e biotecnologia aplicada. Profundidade técnica inigualável.
+Início: 10/02/2026 | Aulas: Terças | 12 meses | Cert. Pós | Sem TCC
+MÓDULOS E DISCIPLINAS:
+1. Ecofisiologia e Mecanismos de Resistência em Plantas (90h): Metabolismo secundário; Eletrofisiologia em plantas; Memória em plantas; Ecofisiologia do estresse: abióticos e bióticos; Sistema imune; Indutores de resistência
+2. Nutrição Mineral e Regulação Hormonal (90h): Metabolismo do nitrogênio e enxofre; Metabolismo do fósforo e potássio; Metabolismo do cálcio e magnésio; Metabolismo de micronutrientes; Hormônios vegetais: auxina, citocinina e giberelina; Hormônios vegetais: etileno, ácido ab, brassinoesteróides, estrigolactona e ácido jasmônico
+3. Ferramentas Biotecnológicas para o Manejo (90h): Inoculação e co-inoculação nas culturas; Biorreguladores e bioestimulantes; Biodefensivos; Resistência a estresses através do melhoramento genético; Análises fisiológicas em plantas para tomada de decisão no campo; Identificação de deficiências e análise foliar
+4. Processos Fisiológicos (90h): Fotossíntese: fase luminosa e assimilação de carbono; Fotossíntese: fotorrespiração e assimilação de carbono; Fisiologia da absorção de água e nutrientes; Fisiologia da germinação; Fisiologia do sistema radicular; Transporte de fotoassimilados e respiração
+
+--- PÓS-GRADUAÇÃO EM SOLOS E FERTILIDADE DOS SOLOS (PFS) ---
+Início: 25/02/2026 | Aulas: Quartas | 12 meses | Cert. Pós | Sem TCC
+MÓDULOS E DISCIPLINAS:
+1. Manejo da Fertilidade (90h): Corretivos e Condicionadores de Solo; Formulação e Eficiência de Fertilizantes Minerais; Nutrição Mineral de Plantas; Manejo Nutricional em Soja e Algodão; Manejo Nutricional em Milho e Cana; Manejo Nutricional em Café e Citrus
+2. Gênese e Morfologia de Solos (90h): Pedogênese: Fatores e Processos de Formação do Solo; Atributos do Solo: Morfológicos, Físicos, Químicos e Mineralógicos; Potencialidades e Limitações das Principais Classes de Solo; Mapeamento de Solos e Ambientes de Produção na Cana-de-Açúcar; Mapeamento de Solos e Zonas de Manejo para Soja e Milho; Amostragem e Interpretação de Análises de Solo e Planta
+3. Dinâmica do Solo (90h): Matéria Orgânica do Solo; Dinâmica do Carbono no Sistema Solo-Planta-Ambiente; Fertilizantes Orgânicos e Organominerais; Dinâmica do Nitrogênio, Enxofre e Potássio; Dinâmica do Cálcio, Magnésio e Fósforo; Dinâmica de Micronutrientes
+4. Propriedades Físicas e Biológicas (90h): Estrutura, Porosidade e Ambiente Radicular; Microbiologia Aplicada à Fertilidade do Solo; Diagnóstico e Técnicas de Manejo da Compactação; Manejo Biológico do Solo; Bioindicadores e Qualidade da Saúde do Solo; Manejo para Conservação do Solo
+
+--- PÓS-GRADUAÇÃO EM FERTILIDADE E SAÚDE DO SOLO (PSS) ---
+DIFERENCIAL: Único curso que une fertilidade do solo + sistemas regenerativos (SAFs, ILP) + mercado de carbono. Cobre desde correção mineral até geração de receita por agricultura regenerativa.
+360h | Cert. Pós | EAD
+MÓDULOS E DISCIPLINAS:
+1. Manejo da Fertilidade do Solo e Nutrição das Culturas (90h): Corretivos e Condicionadores de Solo; Formulação e Eficiência de Fertilizantes Minerais; Fertilizantes Orgânicos e Organominerais; Manejo Nutricional em Soja e Algodão; Manejo Nutricional em Milho e Cana; Manejo Nutricional em Café e Citros
+2. Atributos Edáficos, Mapeamento de Solos e Sistemas Produtivos Regenerativos (90h): Atributos do Solo: Morfológicos, Físicos, Químicos e Mineralógicos; Potencialidades e Limitações das Principais Classes de Solo; Mapeamento de Solos e Ambientes de Produção na Cana; Mapeamento de Solos e Zonas de Manejo para Soja e Milho; Amostragem e Interpretação de Análises de Solo e Planta; Sistemas Produtivos Regenerativos: SAFs, ILP e Recuperação de Áreas Degradadas
+3. Matéria Orgânica, Dinâmicas dos Nutrientes no Solo e Mercado de Carbono (90h): Matéria Orgânica do Solo; Dinâmica do Carbono no Sistema Solo-Planta-Ambiente; Mercado de Carbono, Certificação e Geração de Receita através da Agricultura Regenerativa; Dinâmica do Nitrogênio, Enxofre e Potássio; Dinâmica do Cálcio, Magnésio e Fósforo; Dinâmica de Micronutrientes
+4. Manejo Aplicado à Conservação e Saúde do Solo (90h): Estrutura, Porosidade, Ambiente Radicular e Manejo da Compactação do Solo; Manejo para Conservação do Solo; Microbiologia Aplicada à Fertilidade do Solo; Manejo do Solo com Bioestimulantes e Biofertilizantes; Principais Bioinsumos para Manejo de Pragas, Nematoides e Doenças do Solo; Bioindicadores Relacionados à Saúde do Solo
+
+--- PÓS-GRADUAÇÃO EM SOJA E MILHO (PSM) ---
+DIFERENCIAL: Único curso que cobre soja E milho juntos, incluindo estratégias de comercialização e mercado futuro. Do manejo técnico à gestão de custos e rentabilidade.
+360h | Cert. Pós | EAD
+MÓDULOS E DISCIPLINAS:
+1. Economia e Estratégias de Produção (90h): Custos e viabilidade de produção; Cenário econômico nacional e internacional; Mercado futuro e estratégias de comercialização; Construção de perfis de solos arenosos para altas produtividades; Ecofisiologia da soja e do milho; Mudanças climáticas e agrometeorologia no manejo dos cultivos
+2. Tecnologias e Práticas no Manejo Agrícola (90h): Agricultura de precisão e zonas de manejo; Aprimoramento do rendimento operacional; Práticas corretivas do solo; Construção de perfis de solos argilosos para altas produtividades; Manejo microbiológico do solo; Plantabilidade
+3. Qualidade e Nutrição das Culturas (90h): Qualidade e tratamento de sementes; Inoculação e co-inoculação; Nutrição e adubação do milho; Nutrição e adubação da soja; Identificação e manejo integrado de plantas daninhas; Identificação e manejo integrado de pragas em soja e milho
+4. Sanidade e Colheita das Culturas (90h): Identificação e manejo integrado de doenças em soja; Identificação e manejo integrado de doenças em milho; Dessecação e colheita; Tecnologia de aplicação de produtos fitossanitários; Identificação e manejo integrado de nematoides; Sistemas de rotação
+
+--- PÓS-GRADUAÇÃO EM CANA-DE-AÇÚCAR (PCA) ---
+DIFERENCIAL: Inclui o Rally da Cana — evento presencial exclusivo nos dias 7–8 Mai 2026, com visitas técnicas em Piracicaba-SP (ESALQ/USP/UNICAMP). Único curso com esse formato prático.
+360h | Cert. Pós | EAD | Evento: Rally da Cana 7–8 Mai 2026, Piracicaba-SP
+MÓDULOS E DISCIPLINAS:
+1. Planejamento, Mecanização e Técnicas de Manejo da Produção da Cana (90h): Qualidade física do solo e compactação; Manejo microbiológico do solo; Classificação e manejo dos solos cultivados com cana-de-açúcar; Atualização dos conhecimentos em ambientes de produção: manejo; Uso de drones e VANT em canaviais; Agricultura de precisão e zonas de manejo
+2. Manejo, Correção do Solo e Nutrição da Cana-de-Açúcar (90h): Adubação verde e rotação de culturas; Estabelecimento de canaviais de alta produtividade; Práticas corretivas; Atualizações sobre o uso de vinhaça; Adubação de plantio; Adubação de soqueira
+3. Manejo Fitossanitário e Maturação (90h): Manejo eficiente de pragas na cana-de-açúcar; Novas técnicas de manejo de nematoides; Novas técnicas de manejo de doenças; Novas técnicas de manejo de plantas daninhas; Fisiologia da maturação e uso de maturadores; Análise tecnológica da cana-de-açúcar
+4. Mercado, Custos e Análise Tecnológica da Cana (90h): Projeções e tendências para o mercado da cana-de-açúcar; Custos de produção de cana-de-açúcar; Agrometeorologia dos cultivos e modelos de previsão de safra; Fisiologia da cana-de-açúcar; Sistematização, preparo e conservação do solo; Produção de mudas pré-brotadas
+
+--- PÓS-GRADUAÇÃO EM BIOINSUMOS (PB) ---
+DIFERENCIAL: Único curso 100% focado em bioinsumos — do manejo a campo até produção industrial, legislação e estratégia de mercado. Setor em forte ascensão com demanda crescente por especialistas.
+Início: 15/04/2026 | Aulas: Quartas | 12 meses | Cert. Pós | Sem TCC
+MÓDULOS E DISCIPLINAS:
+1. Regulamentação, legislação e atualizações na temática bioinsumos (90h): Bioprospecção: identificação de novos organismos; Legislação e regulamentação de bioinsumos; Bioengenharia e a criação de cepas úteis aos cultivos; Interações entre bioinsumos e agroquímicos no campo; Princípios da produção de macrobiológicos; Análise biológica do solo
+2. Aspectos e características da produção de bioinsumos (90h): Rastreabilidade de bioinsumos: certificação e segurança no uso; Produção on-farm: microrganismos e biodefensivos; Produção de compostados: legislação, produção e agregação de valor; Biodigestores e biorreatores: possibilidades de ganhos econômicos; Produção industrial de bioinsumos; Estratégia de posicionamento de mercado: Como posicionar e promover produtos biológicos
+3. Estratégias de manejo e possibilidades de uso de bioinsumos no campo (90h): Uso de plantas de cobertura para incrementar a fertilidade biológica do solo; Aspectos do uso de biorreguladores; Reestruturação da microbiologia do solo; Controle Biológico de Pragas (+ nematoides); Controle Biológico de Doenças; Estratégias de uso de biofertilizantes e microrganismos benéficos à nutrição de plantas
+4. Fundamentos de bioinsumos, microbiologia e macrobiologia (90h): Macro e microbiologia do solo e da rizosfera; Metabolismos de microrganismos e produção de compostos úteis às plantas; Microrganismos e suas relações com as plantas; Inoculantes e eficiência no uso de nitrogênio; Fisiologia do uso de bioestimulantes e suas principais aplicações; Princípios de utilização de biodefensivos
+
+========== EVENTOS ==========
+
+--- IMERSÃO IA NO AGRONEGÓCIO ---
+Datas: 26 e 27 de março de 2026 | Local: Inova Park, Piracicaba-SP | 08h30–18h | Certificado
+O QUE É: Imersão estratégica em IA aplicada ao agro. Não é curso de ChatGPT, não é programação.
+PALESTRANTES: Kleber Rodrigues (Qualiserve), Guilherme Sanches (OnAgri)
+DIA 1: Impacto da IA no Futuro do Trabalho no Agro; Conceitos Gerais para Projetos de IA; Soluções de IA aplicadas ao Agronegócio; Estudo de Caso BigTech
+DIA 2: Aplicações Reais de IA no Agro; Oficina Prática – Identificando Problemas Reais; Oficina Prática – Laboratório de Soluções; Certificação e Encerramento
+
+--- IMERSÃO DNA – FINANCIAMENTO PRIVADO NO AGRO ---
+Datas: 18 a 20 de março de 2026 | Local: São Paulo-SP | 100% presencial
+PARA QUEM: Produtores rurais e sucessores que enfrentam desafios de crédito agro.
+PLAYERS: B3, XP Investimentos, SP Ventures, Zera.Ag
+TEMA CENTRAL: "O dinheiro atual para financiar o agro não é suficiente." Guia definitivo do financiamento privado.
+
+--- SBSS – SIMPÓSIO BRASILEIRO DE SEMENTES E SUSTENTABILIDADE ---
+Data: 05 e 06 de agosto de 2026 | Local: WTC Goiânia-GO | 500 participantes
+Formato: Apresentações, painéis e mesas redondas | Público: Indústria + Pesquisadores + Produtores
+
+========== OBJEÇÕES GERAIS ==========
+1. "É muito caro" → "O investimento se paga quando você evita uma decisão errada ou fecha uma venda que não fecharia sem o conhecimento. Qual o custo de não se capacitar?"
+2. "Não tenho tempo" → "As aulas ficam gravadas na plataforma. Você estuda no seu ritmo, 3h por semana encaixam em qualquer agenda."
+3. "Vou pensar" → "Claro. Só te faço uma pergunta: quando seus concorrentes já estiverem preparados, você prefere estar na frente ou correndo atrás?"
+4. "Já tenho experiência" → "Justamente por isso faz sentido. Experiência + conhecimento estruturado é o que separa quem executa de quem lidera."
+5. "Não sei se consigo acompanhar" → "Os cursos são desenhados para quem está na prática, não para acadêmicos."
+6. "Não sei nada sobre IA" → "Perfeito, o MBA IAL é feito exatamente para você! Não é técnico."
+7. "Prefiro presencial/online" → "Temos os dois. MBAs e Pós são online com aulas ao vivo gravadas. Imersões são 100% presenciais."
+8. "Minha empresa não está pronta" → "Justamente por isso comece agora. Quando a empresa estiver pronta, você precisa já estar preparado para liderar."
+9. "Tem conteúdo gratuito na internet" → "Conteúdo gratuito ensina ferramenta. Formação estrutura visão, metodologia e resultado."
+10. "Não sei se é para meu perfil" → "Me conta o que você faz hoje e eu te mostro exatamente como esse curso impacta seu dia a dia."` ;
+
+// ── PRODUTOS ───────────────────────────────────────────────
+const PRODUCTS = [
+  { name:"Imersão IA no Agronegócio", badge:"imersao", badgeLabel:"Imersão", desc:"2 dias presenciais de aprendizado estratégico sobre IA aplicada ao campo e ao negócio.", meta:["26–27 Mar 2026","Piracicaba-SP","Presencial","Certificado"], context:"Imersão IA no Agronegócio" },
+  { name:"MBA em Inteligência Artificial no Agro (IAL)", badge:"mba", badgeLabel:"MBA", desc:"MBA focado em liderança com IA. Sem conhecimento técnico necessário.", meta:["Início 09/02/26","Segundas 19h–22h","12 meses","Cert. MEC"], context:"MBA IAL" },
+  { name:"MBA em Agronegócios", badge:"mba", badgeLabel:"MBA", desc:"O único MBA com PBL personalizado por IA. Conecta você com o agro inteiro.", meta:["Início 21/01/26","Quartas 19h–22h","12+6 meses","Cert. MEC"], context:"MBA em Agronegócios" },
+  { name:"MBA em Vendas no Agronegócio (VNA)", badge:"mba", badgeLabel:"MBA", desc:"Técnicas de conversão e estruturação comercial para profissionais de vendas no agro.", meta:["Início 27/04/26","Segundas 19h–22h","12+6 meses","360h"], context:"MBA VNA" },
+  { name:"MBA em Marketing Estratégico (MEA)", badge:"mba", badgeLabel:"MBA", desc:"Marketing orientado a dados, posicionamento e integração com vendas no agro.", meta:["Início 27/04/26","Segundas","12 meses","2 Eventos Presenciais"], context:"MBA MEA" },
+  { name:"Pós em Fisiologia e Nutrição de Plantas (PFV)", badge:"pos", badgeLabel:"Pós", desc:"Domínio técnico em fisiologia vegetal, nutrição e adubação para maior rentabilidade.", meta:["Início 10/02/26","Terças-feiras","12 meses"], context:"Pós PFV" },
+  { name:"Pós em Solos e Fertilidade do Solo (PFS)", badge:"pos", badgeLabel:"Pós", desc:"Base técnica completa em fertilidade, manejo e correção de solos.", meta:["Início 25/02/26","Quartas-feiras","12 meses"], context:"Pós PFS" },
+  { name:"Pós em Bioinsumos (PB)", badge:"pos", badgeLabel:"Pós", desc:"Autoridade em um dos mercados mais promissores do agronegócio atual.", meta:["Início 15/04/26","Quartas-feiras","12 meses"], context:"Pós Bioinsumos" },
+  { name:"Pós em Cana-de-Açúcar (PCA)", badge:"pos", badgeLabel:"Pós", desc:"Especialização completa na cadeia da cana, com Rally da Cana presencial.", meta:["Rally: 7–8 Mai 2026","Piracicaba-SP","ESALQ/USP/UNICAMP"], context:"Pós Cana-de-Açúcar PCA" },
+  { name:"SBSS – Simpósio de Sementes", badge:"evento", badgeLabel:"Evento", desc:"500 participantes reunindo indústria, pesquisadores e produtores em Goiânia.", meta:["05–06 Ago 2026","WTC Goiânia-GO","500 participantes"], context:"SBSS Simpósio Sementes" },
+  { name:"Imersão DNA – Financiamento Privado", badge:"imersao", badgeLabel:"Imersão", desc:"Como acessar o financiamento privado para o agro: B3, XP, SP Ventures e mais.", meta:["18–20 Mar 2026","São Paulo-SP","Presencial","Produtores"], context:"Imersão DNA Financiamento" },
+  { name:"MBA em Liderança, Gestão e Estratégia (LGE)", badge:"mba", badgeLabel:"MBA", desc:"Liderança, gestão de processos e estratégia financeira para líderes do agronegócio.", meta:["EAD ao vivo","Encontros presenciais","360h","Cert. Pós"], context:"MBA LGE" },
+  { name:"MBA em Gestão de Times Comerciais (GTC)", badge:"mba", badgeLabel:"MBA", desc:"Arquitetura e gestão de times comerciais de alta performance no agronegócio.", meta:["EAD ao vivo","Encontros presenciais","360h","Cert. Pós"], context:"MBA GTC" },
+  { name:"MBA em Gestão de Propriedades Agrícolas (GPA)", badge:"mba", badgeLabel:"MBA", desc:"Gestão profissional da fazenda: finanças, pessoas, planejamento e sucessão.", meta:["EAD ao vivo","Encontros presenciais","360h","Cert. Pós"], context:"MBA GPA" },
+  { name:"Pós em Fertilidade e Saúde do Solo (PSS)", badge:"pos", badgeLabel:"Pós", desc:"Fertilidade, sistemas regenerativos, SAFs, ILP e mercado de carbono.", meta:["EAD ao vivo","360h","Cert. Pós"], context:"Pós PSS" },
+  { name:"Pós em Soja e Milho (PSM)", badge:"pos", badgeLabel:"Pós", desc:"Especialização completa em produção de soja e milho: manejo, nutrição e sanidade.", meta:["EAD ao vivo","360h","Cert. Pós"], context:"Pós Soja e Milho PSM" },
+];
+
+// ── OBJEÇÕES ───────────────────────────────────────────────
+const OBJECTIONS = [
+  { n:"01", q:'"É muito caro / o investimento é alto"', a:'O investimento se paga quando você evita uma decisão errada ou fecha uma venda que não fecharia sem o conhecimento. Qual o custo real de não se capacitar?' },
+  { n:"02", q:'"Não tenho tempo para estudar"', a:'As aulas ficam gravadas na plataforma. Você estuda no seu ritmo, sem perder nenhum conteúdo. A maioria dos alunos encaixa numa noite por semana — 3 horas e já era.' },
+  { n:"03", q:'"Vou pensar / preciso decidir depois"', a:'Claro. Só te faço uma pergunta: quando seus concorrentes já estiverem preparados, você prefere estar na frente ou correndo atrás? As turmas têm vagas limitadas.' },
+  { n:"04", q:'"Já tenho muita experiência no mercado"', a:'Justamente por isso faz sentido. Experiência + conhecimento estruturado é o que separa quem executa de quem lidera. Os melhores professores do Brasil estão nessa sala.' },
+  { n:"05", q:'"Não sei se consigo acompanhar o conteúdo"', a:'Os cursos são desenhados para quem está na prática, não para acadêmicos. Se você trabalha no agro, você já tem o contexto — a formação dá a estrutura que falta.' },
+  { n:"06", q:'"Tem muito conteúdo gratuito na internet"', a:'Conteúdo gratuito ensina ferramenta. Formação estrutura visão, metodologia e resultado. A diferença é a mesma entre ver vídeo de culinária e fazer um curso de chef.' },
+];
+let customObjections = (() => { try { return JSON.parse(localStorage.getItem('agro_custom_obj') || '[]'); } catch(e) { return []; } })();
+
+// ── STATE ──────────────────────────────────────────────────
+let currentUser = null;
+let conversations = (() => { try { return JSON.parse(localStorage.getItem('agro_convs_v3') || '[]'); } catch(e) { return []; } })();
+let currentConvId = null;
+let isLoading = false;
+
+// ── LOGIN ──────────────────────────────────────────────────
+function doLogin() {
+  const raw = document.getElementById('login-user').value.trim();
+  const p = document.getElementById('login-pass').value;
+  const err = document.getElementById('login-error');
+  const matchKey = Object.keys(USERS).find(k => k.toLowerCase() === raw.toLowerCase());
+  if (matchKey && USERS[matchKey] === p) {
+    currentUser = matchKey;
+    err.style.display = 'none';
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    document.getElementById('user-name-display').textContent = matchKey.charAt(0).toUpperCase() + matchKey.slice(1);
+    document.getElementById('user-avatar').textContent = matchKey.charAt(0).toUpperCase();
+    renderSidebarHist(); renderProducts(); renderObjections(); renderHistFull();
+  } else {
+    err.style.display = 'block';
+    document.getElementById('login-pass').value = '';
+  }
+}
+document.getElementById('login-pass').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+document.getElementById('login-user').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('login-pass').focus(); });
+
+function doLogout() {
+  currentUser = null;
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('login-user').value = '';
+  document.getElementById('login-pass').value = '';
+}
+
+// ── PANELS ────────────────────────────────────────────────
+function setPanel(name, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+  if(btn) btn.classList.add('active');
+}
+
+// ── CHAT ──────────────────────────────────────────────────
+function welcomeHTML() {
+  return `<div class="welcome-block" id="welcome-block">
+    <div class="welcome-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#0a1628" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><circle cx="9" cy="10" r="1" fill="#0a1628"/><circle cx="12" cy="10" r="1" fill="#0a1628"/><circle cx="15" cy="10" r="1" fill="#0a1628"/></svg></div>
+    <h2>AgroBot</h2>
+    <p>Seu suporte comercial em tempo real. Tire dúvidas dos clientes sobre cursos, MBAs, pós-graduações e eventos — com argumentos precisos e respostas prontas para objeções.</p>
+    <div class="quick-chips">
+      <div class="chip" onclick="sendChip(this)">Quais produtos temos disponíveis?</div>
+      <div class="chip" onclick="sendChip(this)">Como vender o MBA IAL?</div>
+      <div class="chip" onclick="sendChip(this)">Como rebater "é muito caro"?</div>
+      <div class="chip" onclick="sendChip(this)">Para quem é o MBA em Agronegócios?</div>
+      <div class="chip" onclick="sendChip(this)">O que é a Imersão DNA?</div>
+    </div>
+  </div>`;
+}
+
+function newChat() {
+  currentConvId = null;
+  document.getElementById('messages').innerHTML = welcomeHTML();
+}
+
+function sendChip(el) {
+  document.getElementById('chat-input').value = el.textContent;
+  sendMessage();
+}
+
+function getTime() {
+  return new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+}
+
+function appendMsg(role, text, isError=false) {
+  document.getElementById('welcome-block')?.remove();
+  const area = document.getElementById('messages');
+  const div = document.createElement('div');
+  div.className = `msg ${role}${isError?' msg-error':''}`;
+  const logoSrc = document.getElementById('logo-img')?.src || '';
+  const av = role==='agent' ? `<img src="${logoSrc}" alt="AgroBot">` : (currentUser||'U').charAt(0).toUpperCase();
+  div.innerHTML = `<div class="msg-avatar">${av}</div><div class="msg-content"><div class="msg-bubble">${text}</div><div class="msg-time">${getTime()}</div></div>`;
+  area.appendChild(div);
+  area.scrollTop = area.scrollHeight;
+}
+
+function appendTyping() {
+  document.getElementById('welcome-block')?.remove();
+  const area = document.getElementById('messages');
+  const div = document.createElement('div');
+  div.className = 'msg agent'; div.id = 'typing-indicator';
+  const logoSrc2 = document.getElementById('logo-img')?.src || '';
+  div.innerHTML = `<div class="msg-avatar"><img src="${logoSrc2}" alt="AgroBot"></div><div class="msg-content"><div class="msg-bubble"><div class="typing-dots"><span></span><span></span><span></span></div></div></div>`;
+  area.appendChild(div);
+  area.scrollTop = area.scrollHeight;
+}
+
+function removeTyping() { document.getElementById('typing-indicator')?.remove(); }
+
+function fmt(text) {
+  return text
+    .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g,'<em>$1</em>')
+    .replace(/^[-•]\s(.+)/gm,'<li>$1</li>')
+    .replace(/(?:<li>.+<\/li>\n?)+/g,m=>`<ul style="padding-left:16px;margin:6px 0">${m}</ul>`)
+    .replace(/\n\n/g,'<br><br>').replace(/\n/g,'<br>');
+}
+
+async function sendMessage() {
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text || isLoading) return;
+  input.value = ''; input.style.height = 'auto';
+  isLoading = true;
+  document.querySelector('.btn-send').disabled = true;
+
+  appendMsg('user', text);
+  appendTyping();
+
+  if (!currentConvId) {
+    currentConvId = Date.now().toString();
+    conversations.unshift({ id:currentConvId, title:text.slice(0,50), msgs:[], date:new Date().toLocaleDateString('pt-BR') });
+  }
+  const conv = conversations.find(c => c.id === currentConvId);
+  conv.msgs.push({ role:'user', content:text });
+
+  const apiMessages = conv.msgs.map(m => ({ role: m.role==='user'?'user':'assistant', content: m.content }));
+
+  try {
+    const res = await fetch(WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ system: SYSTEM_PROMPT, messages: apiMessages })
+    });
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    const data = await res.json();
+    removeTyping();
+
+    // Suporta resposta direta da Anthropic via n8n ou texto puro
+    let reply = '';
+    if (data?.content?.[0]?.text) reply = data.content[0].text;
+    else if (data?.text) reply = data.text;
+    else if (typeof data === 'string') reply = data;
+    else if (data?.message) reply = data.message;
+    else reply = JSON.stringify(data);
+
+    appendMsg('agent', fmt(reply));
+    conv.msgs.push({ role:'assistant', content:reply });
+    saveConvs(); renderSidebarHist(); renderHistFull();
+
+  } catch(e) {
+    removeTyping();
+    appendMsg('agent', `⚠️ Erro ao conectar com o agente.<br><small style="opacity:.7">Detalhe: ${e.message}</small>`, true);
+  }
+  document.querySelector('.btn-send').disabled = false;
+  isLoading = false;
+}
+
+function saveConvs() { localStorage.setItem('agro_convs_v3', JSON.stringify(conversations.slice(0,50))); }
+
+document.getElementById('chat-input').addEventListener('keydown', e => {
+  if(e.key==='Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+});
+document.getElementById('chat-input').addEventListener('input', function() {
+  this.style.height = 'auto';
+  this.style.height = Math.min(this.scrollHeight,120)+'px';
+});
+
+// ── SIDEBAR HIST ──────────────────────────────────────────
+function renderSidebarHist() {
+  const el = document.getElementById('sidebar-hist');
+  el.innerHTML = conversations.slice(0,5).map(c =>
+    `<div class="hist-item" onclick="loadConv('${c.id}')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span>${c.title}</span>
+    </div>`).join('') || '<div style="font-size:12px;color:var(--text-muted);padding:0 12px">Nenhuma conversa ainda</div>';
+}
+
+function loadConv(id) {
+  const conv = conversations.find(c => c.id === id);
+  if(!conv) return;
+  currentConvId = id;
+  const area = document.getElementById('messages');
+  area.innerHTML = '';
+  conv.msgs.forEach(m => appendMsg(m.role==='user'?'user':'agent', fmt(m.content)));
+  setPanel('chat', document.querySelectorAll('.nav-btn')[0]);
+}
+
+// ── PRODUCTS ──────────────────────────────────────────────
+function renderProducts(filter='') {
+  const f = filter.toLowerCase();
+  const filtered = PRODUCTS.filter(p => !f || p.name.toLowerCase().includes(f) || p.desc.toLowerCase().includes(f));
+  document.getElementById('products-grid').innerHTML = filtered.map(p =>
+    `<div class="product-card">
+      <div class="product-badge badge-${p.badge}">● ${p.badgeLabel}</div>
+      <div class="product-name">${p.name}</div>
+      <div class="product-desc">${p.desc}</div>
+      <div class="product-meta">${p.meta.map(m=>`<span class="meta-tag">${m}</span>`).join('')}</div>
+      <button class="btn-ask-product" onclick="askAboutProduct('${p.context}')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Perguntar ao agente
+      </button>
+    </div>`).join('') || '<div style="color:var(--text-muted);font-size:14px;padding:12px 0">Nenhum produto encontrado.</div>';
+}
+
+function filterProducts(v) { renderProducts(v); }
+
+function askAboutProduct(name) {
+  document.getElementById('chat-input').value = `Me dê um resumo completo de vendas sobre: ${name}`;
+  setPanel('chat', document.querySelectorAll('.nav-btn')[0]);
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.nav-btn')[0].classList.add('active');
+  setTimeout(sendMessage, 100);
+}
+
+// ── OBJECTIONS ────────────────────────────────────────────
+function renderObjections() {
+  const fixedCards = OBJECTIONS.map((o,i) =>
+    `<div class="obj-card" id="obj-${i}">
+      <div class="obj-q" onclick="toggleObj(${i})">
+        <div class="obj-q-num">${o.n}</div>
+        <div class="obj-q-text">${o.q}</div>
+        <svg class="obj-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="obj-answer">${o.a}
+        <div class="obj-actions">
+          <button class="copy-resp" onclick="copyObj(${i},'fixed')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Copiar
+          </button>
+          <button class="refresh-resp" title="Gerar nova resposta com IA" onclick="refreshObj(${i},'fixed')">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="13" height="13"><path d="M12 2l2.09 6.26L21 10l-6.91 1.74L12 18l-2.09-6.26L3 10l6.91-1.74z"/><path d="M5 2l.9 2.7L8 5.5l-2.1.8L5 9l-.9-2.7L2 5.5l2.1-.8z" opacity=".6"/><path d="M19 15l.7 2.1L22 18l-2.3.9L19 21l-.7-2.1L16 18l2.3-.9z" opacity=".5"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>`).join('');
+
+  const customCards = customObjections.map((o,i) =>
+    `<div class="obj-card obj-card-custom" id="obj-c-${i}">
+      <div class="obj-q" onclick="toggleObjCustom(${i})">
+        <div class="obj-q-num">✦</div>
+        <div class="obj-q-text">${o.q}</div>
+        <svg class="obj-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="obj-answer">${o.a}
+        <div class="obj-actions">
+          <button class="copy-resp" onclick="copyObj(${i},'custom')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Copiar
+          </button>
+          <button class="refresh-resp" title="Gerar nova resposta com IA" onclick="refreshObj(${i},'custom')">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="13" height="13"><path d="M12 2l2.09 6.26L21 10l-6.91 1.74L12 18l-2.09-6.26L3 10l6.91-1.74z"/><path d="M5 2l.9 2.7L8 5.5l-2.1.8L5 9l-.9-2.7L2 5.5l2.1-.8z" opacity=".6"/><path d="M19 15l.7 2.1L22 18l-2.3.9L19 21l-.7-2.1L16 18l2.3-.9z" opacity=".5"/></svg>
+          </button>
+          <button class="btn-del-obj" title="Excluir" onclick="deleteCustomObj(${i})">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>`).join('');
+
+  document.getElementById('obj-list').innerHTML = fixedCards + customCards;
+}
+
+function toggleObj(i) { document.getElementById('obj-'+i).classList.toggle('open'); }
+function toggleObjCustom(i) { document.getElementById('obj-c-'+i).classList.toggle('open'); }
+
+function copyObj(i, type) {
+  const text = type === 'custom' ? customObjections[i].a : OBJECTIONS[i].a;
+  navigator.clipboard.writeText(text);
+  showToast('Resposta copiada!');
+}
+
+async function refreshObj(i, type) {
+  const q = type === 'custom' ? customObjections[i].q : OBJECTIONS[i].q;
+  const cardId = type === 'custom' ? 'obj-c-'+i : 'obj-'+i;
+  const card = document.getElementById(cardId);
+  const answerEl = card.querySelector('.obj-answer');
+  const btn = card.querySelector('.refresh-resp');
+
+  btn.disabled = true;
+  btn.style.opacity = '.4';
+  const prevHTML = answerEl.innerHTML;
+  answerEl.innerHTML = '<div style="padding:4px 0;color:var(--text-muted);font-size:13px;display:flex;align-items:center;gap:8px"><div class="typing-dots"><span></span><span></span><span></span></div> Gerando nova resposta...</div>';
+
+  try {
+    const res = await fetch(WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        system: SYSTEM_PROMPT,
+        messages: [{ role:'user', content:`Me dê uma resposta comercial diferente, criativa e concisa para a seguinte objeção de cliente: ${q}. Responda apenas com o script de resposta, sem explicações adicionais.` }]
+      })
+    });
+    if (!res.ok) throw new Error('HTTP '+res.status);
+    const data = await res.json();
+    let reply = '';
+    if (data?.content?.[0]?.text) reply = data.content[0].text;
+    else if (data?.text) reply = data.text;
+    else if (typeof data === 'string') reply = data;
+    else if (data?.message) reply = data.message;
+    else throw new Error('Resposta inválida');
+
+    const actionsHTML = prevHTML.match(/<div class="obj-actions">[\s\S]*<\/div>\s*$/)?.[0] || '';
+    answerEl.innerHTML = reply + '\n        ' + actionsHTML;
+    showToast('Nova resposta gerada!');
+  } catch(e) {
+    answerEl.innerHTML = prevHTML;
+    showToast('Erro ao gerar resposta.');
+  }
+
+  btn.disabled = false;
+  btn.style.opacity = '';
+}
+
+function openAddObjModal() {
+  if (document.getElementById('obj-modal')) return;
+  const modal = document.createElement('div');
+  modal.className = 'obj-modal-overlay';
+  modal.id = 'obj-modal';
+  modal.innerHTML = `
+    <div class="obj-modal">
+      <h3>Nova Objeção</h3>
+      <div class="obj-modal-field">
+        <label>Objeção do cliente</label>
+        <input type="text" id="new-obj-q" placeholder='"Exemplo: não tenho verba agora"' />
+      </div>
+      <div class="obj-modal-field">
+        <label>Sua resposta</label>
+        <textarea id="new-obj-a" placeholder="Escreva o script de resposta..."></textarea>
+      </div>
+      <div class="obj-modal-btns">
+        <button class="btn-modal-cancel" onclick="closeAddObjModal()">Cancelar</button>
+        <button class="btn-modal-save" onclick="saveCustomObj()">Salvar</button>
+      </div>
+    </div>`;
+  modal.addEventListener('click', e => { if (e.target === modal) closeAddObjModal(); });
+  document.body.appendChild(modal);
+  setTimeout(() => document.getElementById('new-obj-q').focus(), 50);
+}
+
+function closeAddObjModal() {
+  const m = document.getElementById('obj-modal');
+  if (m) m.remove();
+}
+
+function saveCustomObj() {
+  const q = document.getElementById('new-obj-q').value.trim();
+  const a = document.getElementById('new-obj-a').value.trim();
+  if (!q || !a) { showToast('Preencha os dois campos!'); return; }
+  customObjections.push({ q, a });
+  localStorage.setItem('agro_custom_obj', JSON.stringify(customObjections));
+  closeAddObjModal();
+  renderObjections();
+  showToast('Objeção salva!');
+}
+
+function deleteCustomObj(i) {
+  customObjections.splice(i, 1);
+  localStorage.setItem('agro_custom_obj', JSON.stringify(customObjections));
+  renderObjections();
+  showToast('Objeção removida.');
+}
+
+// ── HIST FULL ─────────────────────────────────────────────
+function renderHistFull() {
+  const el = document.getElementById('hist-full-list');
+  el.innerHTML = conversations.length
+    ? conversations.map(c =>
+        `<div class="hist-full-item" onclick="loadConv('${c.id}')">
+          <div class="hist-full-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+          <div class="hist-full-text"><div class="hist-full-title">${c.title}</div><div class="hist-full-date">${c.date}</div></div>
+          <div class="hist-full-msgs">${c.msgs.length} msgs</div>
+        </div>`).join('')
+    : '<div style="color:var(--text-muted);font-size:14px;padding:12px 0">Nenhuma conversa registrada ainda.</div>';
+}
+
+// ── TOAST ─────────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2500);
+}
+</script>
+</body>
+</html>
