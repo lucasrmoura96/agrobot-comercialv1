@@ -678,7 +678,7 @@ let isLoading = false;
 // ── LOGIN ──────────────────────────────────────────────────
 function doLogin() {
   const raw = document.getElementById('login-user').value.trim();
-  const p = document.getElementById('login-pass').value;
+  const p = document.getElementById('login-pass').value.trim();
   const err = document.getElementById('login-error');
   const matchKey = Object.keys(USERS).find(k => k.toLowerCase() === raw.toLowerCase());
   if (matchKey && USERS[matchKey].toLowerCase() === p.toLowerCase()) {
