@@ -399,7 +399,10 @@ const WEBHOOK_URL = 'https://lucasmoura96.app.n8n.cloud/webhook/agente-comercial
 const USERS = { "comercial":"agro2026","Liliane":"lili123","admin":"agro2026","vivi":"vivi123","joao":"joao123","laura":"laura123" };
 
 // ── SYSTEM PROMPT COMPLETO ─────────────────────────────────
+const _hoje = new Date().toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric' });
 const SYSTEM_PROMPT = `Você é o AgroBot — assistente de suporte comercial interno da AGROADVANCE, Escola de Negócios Agro.
+
+DATA DE HOJE: ${_hoje}. Use essa data para determinar quais turmas já iniciaram e quais ainda estão abertas. Nunca sugira como "próxima" uma turma cuja data de início já passou.
 
 MISSÃO: Apoiar o time de vendas em tempo real, respondendo com precisão às dúvidas que os clientes trazem sobre os produtos da Agroadvance.
 
