@@ -396,7 +396,7 @@
 // ── CONFIG ─────────────────────────────────────────────────
 const WEBHOOK_URL = 'https://lucasmoura96.app.n8n.cloud/webhook/agente-comercial';
 
-const USERS = { "Daniella":"Dani123","Liliane":"lili123","admin":"agro2026","Vivi":"vivi123","Joao":"joao123","Ananda":"ananda123", "Sabrina":"sabrina123", "Larissa":"larissa123", "Eloise":"eloise123", "Rejane":"rejane123" };
+const USERS = { "Daniella":"dani123","Liliane":"lili123","admin":"agro2026","Vivi":"vivi123","Joao":"joao123","Ananda":"ananda123","Sabrina":"sabrina123","Larissa":"larissa123","Eloise":"eloise123","Rejane":"rejane123" };
 
 // ── SYSTEM PROMPT COMPLETO ─────────────────────────────────
 const _hoje = new Date().toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric' });
@@ -681,7 +681,7 @@ function doLogin() {
   const p = document.getElementById('login-pass').value;
   const err = document.getElementById('login-error');
   const matchKey = Object.keys(USERS).find(k => k.toLowerCase() === raw.toLowerCase());
-  if (matchKey && USERS[matchKey] === p) {
+  if (matchKey && USERS[matchKey].toLowerCase() === p.toLowerCase()) {
     currentUser = matchKey;
     err.style.display = 'none';
     document.getElementById('login-screen').style.display = 'none';
