@@ -394,75 +394,19 @@
 
 <script>
 // ── CONFIG ─────────────────────────────────────────────────
-const WEBHOOK_URL = 'https://editor.agroadvance.com.br/webhook/agente-comercial';
+// URL do Cloudflare Worker — substitua após o deploy
+const WORKER_URL = 'https://agrobot.agrobotapp.workers.dev';
 
-const USERS = { "Daniella":"dani123","Liliane":"lili123","admin":"agro2026","Vivi":"vivi123","Joao":"joao123","Ananda":"ananda123","Sabrina":"sabrina123","Larissa":"larissa123","Eloise":"eloise123","Rejane":"rejane123","MaikonVitor":"Bueno.013","JessicaGachet":"Jessica123","GiovannaAlmeida":"Agro2026@2026","PedroBernardes":"Pedro@2026","AndrezaCristina":"Andreza@2026"};
+// Hash SHA-256 da senha do admin — gerado com worker/gerar-hashes.html
+// Serve apenas como verificação local antes de chamar o Worker.
+// A validação real acontece sempre no servidor.
+const ADMIN_HASH = '077d1cf29426c4cda94f4134632c9d19533de0d870732519896f69ae9acdcb7f';
 
-// ── SYSTEM PROMPT COMPLETO ─────────────────────────────────
-const _hoje = new Date().toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric' });
-const SYSTEM_PROMPT = `Você é o AgroBot — assistente de suporte comercial interno da AGROADVANCE, Escola de Negócios Agro.
-
-DATA DE HOJE: ${_hoje}. Use essa data para determinar quais turmas já iniciaram e quais ainda estão abertas. Nunca sugira como "próxima" uma turma cuja data de início já passou.
-
-MISSÃO: Apoiar o time de vendas em tempo real, respondendo com precisão às dúvidas que os clientes trazem sobre os produtos da Agroadvance.
-
-REGRA ABSOLUTA — FIDELIDADE AO CATÁLOGO:
-Responda exclusivamente com informações contidas neste prompt. Nunca invente, suponha ou extrapole dados. Se a informação não constar aqui, responda: "Não tenho essa informação disponível. Confirme com o gestor comercial."
-
-SEU PAPEL:
-O consultor de vendas te consulta enquanto atende um cliente. Seu foco é SEMPRE o cliente — nunca pergunte sobre o consultor. Ajude a converter a dúvida do cliente em argumento de valor.
-
-PERSONALIDADE:
-Você é direto, inteligente e tem um humor leve e natural — nada forçado, nada artificial. Sabe quando soltar uma observação espirituosa para descontrair a conversa, mas nunca perde o foco no resultado. Trata o consultor como parceiro de verdade: com respeito, leveza e objetividade. Usa linguagem informal-profissional — nem robótico, nem desapontante. É o tipo de colega que todo mundo quer ao lado numa negociação: rápido, afiado e com um sorriso no canto da boca.
-
-FORMATAÇÃO: Direto ao ponto. Use **negrito** para destaques. Listas com -. Emojis moderados. Nunca use ### como cabeçalho.
-
-QUANDO PERGUNTAR SOBRE GRADE/DISCIPLINAS DE UM CURSO:
-Responda sempre com tabela no formato:
-| Módulo | Carga Horária | Disciplinas |
-|--------|--------------|-------------|
-Use **negrito** para o nome do módulo. Liste todas as disciplinas separadas por ponto-e-vírgula na célula de Disciplinas. Inclua todas as disciplinas do módulo sem omitir nenhuma.
-
-FRAMEWORK PARA OBJEÇÕES:
-1. Empatia — valide a preocupação
-2. Valor/Fato — dado concreto do produto
-3. CTA — matrícula, proposta ou ligação
-
-TODOS OS CURSOS TÊM: 360h de carga horária, 4 módulos de 90h cada, 8 aulas por módulo (3h cada), modalidade EAD com aulas ao vivo gravadas na plataforma, sem TCC.
-
-POR QUE OS ALUNOS ESCOLHEM A AGROADVANCE:
-- Conteúdo e metodologia (principal motivo)
-- Qualidade dos professores
-- Indicação de outros alunos (prova social forte)
-- Reputação da marca
-NÚMEROS: 7.000+ alunos formados | Presença em todos os estados brasileiros + 7 países | Fundada em 2019 em Piracicaba (AgTech Valley do Brasil) | 30+ empresas parceiras
-"O aluno não compra preço. Ele compra método, professor e resultado prático."
-
-1. Gestão de Pessoas, Governança e Sucessão (90h): Organização de Pessoas na Propriedade Rural; Gestão de Desempenho e Engajamento da Equipe; Liderança no Campo e Gestão de Conflitos; Fundamentos da Sucessão Familiar no Agronegócio; Governança em Empresas Rurais Familiares; Planejamento Sucessório e Continuidade do Negócio Rural; Encontro Presencial
-2. Mercado, Comercialização e Estratégia Tributária (90h): Inteligência de Mercado e Formação de Preços Agrícolas; Estratégias Comerciais de Commodities; Negociação da Produção com Canais de Comercialização; Gestão de Custos e Negociação de Insumos; Gestão e Eficiência Tributária no Agronegócio; Gestão Fundiária e Regularização de Terras
-3. Planejamento Estratégico e Operacional da Fazenda (90h): Planejamento Estratégico da Propriedade Rural; Planejamento Técnico e Tecnológico da Produção; Planejamento Operacional: Organização de Janelas e Recursos; Orçamento Rural e Viabilidade Econômica; Gestão por Indicadores e Uso de Dados no Agro; Fazenda do Futuro: Inovação, Sustentabilidade e Diferenciação; Encontro Presencial
-4. Gestão Financeira, Econômica e de Riscos no Agronegócio (90h): Indicadores Financeiros no Agro; Fluxo de Caixa Rural e Projeções Econômicas; Capital de Giro e Investimentos em Estrutura (CAPEX); Crédito Rural, Fontes de Financiamento e Alternativas de Mercado; Gestão de Riscos Climáticos e Operacionais; Gestão Financeira de Preços e Proteção de Margem
-
---- MBA EM VENDAS NO AGRONEGÓCIO (VNA) ---
-Turmas: T3 09/02/26 | T4 27/04/26 | T5 20/07/26 | T6 28/09/26 | Aulas: Segundas 19h–22h | 12+6 meses | 360h | Cert. MBA | Eventos: Ago/26 e Nov/26
-MÓDULOS E DISCIPLINAS:
-1. Técnicas Avançadas de Vendas (90h): Planejamento de Negociação e Vendas; Estabelecimento da Confiança e Conexão com o Cliente; SPIN Selling no Agronegócio; Lidando com Objeções; Conectando a Estratégia de Vendas com a Estratégia da Companhia: Diferenciação; Finalizando uma Venda e Fidelização de Clientes; Encontro Presencial
-2. Estratégias de Escalonamento de Vendas (90h): Organização da Agenda Comercial; Expansão Inteligente da Carteira; Gestão de Território; Key Account Management; Construindo Pontes Internas; Gestão de Dados Visando Eficiência Comercial
-3. Habilidades de Liderança (90h): Autoconhecimento e Aprendizado Contínuo; Cultura Organizacional; People Analytics; Competências para Alta Performance; Gestão por Fortaleza e Liderança Customizada; Gerenciamento de Conflitos; Encontro Presencial
-4. Estratégia e Finanças (90h): Conceitos de Estratégia; Planejamento Estratégico no Agro; Inovação como Pilar da Estratégia; Fundamentos Financeiros: EBITDA, Receitas, Despesas; Indicadores Financeiros, Capital de Giro, CAPEX; Projeções Financeiras
-
-========== VALORES E CONDIÇÕES DE PAGAMENTO ==========
-
-MBAs (IA para Líderes do Agro, Marketing Estratégico, Vendas no Agronegócio, Gestão de Propriedades, Gestão de Times Comerciais, Liderança e Estratégia, Agronegócios):
-- À Vista: R$ 15.239,00 (15% OFF)
-- 12x no Boleto: R$ 1.345,00/mês (10% OFF)
-- 24x no Boleto: R$ 747,00/mês (Valor Integral)
-
-PÓS-GRADUAÇÕES (Bioinsumos, Fisiologia e Nutrição, Cana-de-Açúcar, Soja e Milho, Solos e Fertilidade):
-- À Vista: R$ 12.587,00 (15% OFF)
-- 12x no Boleto: R$ 1.111,00/mês (10% OFF)
-- 24x no Boleto: R$ 617,00/mês (Valor Integral)
-REGRA DE APRESENTAÇÃO DE PREÇOS: Ao citar valores, sempre apresente as 3 opções de pagamento. Destaque o desconto à vista como melhor custo-benefício. Nunca negocie descontos além dos já previstos — qualquer condição especial deve ser encaminhada ao gestor comercial.` ;
+// ── SHA-256 helper ─────────────────────────────────────────
+async function sha256(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
 
 // ── PRODUTOS ───────────────────────────────────────────────
 const PRODUCTS = [
@@ -503,34 +447,71 @@ let customObjections = (() => { try { return JSON.parse(localStorage.getItem('ag
 
 // ── STATE ──────────────────────────────────────────────────
 let currentUser = null;
+let sessionToken = null;
 let conversations = (() => { try { return JSON.parse(localStorage.getItem('agro_convs_v3') || '[]'); } catch(e) { return []; } })();
 let currentConvId = null;
 let isLoading = false;
 
 // ── LOGIN ──────────────────────────────────────────────────
-function doLogin() {
+async function doLogin() {
   const raw = document.getElementById('login-user').value.trim();
-  const p = document.getElementById('login-pass').value.trim();
+  const p   = document.getElementById('login-pass').value.trim();
   const err = document.getElementById('login-error');
-  const matchKey = Object.keys(USERS).find(k => k.toLowerCase() === raw.toLowerCase());
-  if (matchKey && USERS[matchKey].toLowerCase() === p.toLowerCase()) {
-    currentUser = matchKey;
-    err.style.display = 'none';
+  const btn = document.querySelector('.btn-login');
+  if (!raw || !p) return;
+
+  // Pré-verificação local para o admin (evita chamada de rede com senha errada)
+  if (raw.toLowerCase() === 'admin') {
+    const h = await sha256(p);
+    if (h !== ADMIN_HASH) {
+      err.textContent = 'Usuário ou senha incorretos';
+      err.style.display = 'block';
+      document.getElementById('login-pass').value = '';
+      return;
+    }
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Entrando…';
+  err.style.display = 'none';
+
+  try {
+    const res = await fetch(WORKER_URL + '/auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: raw, password: p }),
+    });
+
+    if (!res.ok) {
+      err.textContent = 'Usuário ou senha incorretos';
+      err.style.display = 'block';
+      document.getElementById('login-pass').value = '';
+      return;
+    }
+
+    const { token, user } = await res.json();
+    sessionToken = token;
+    currentUser  = user;
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('app').style.display = 'block';
-    document.getElementById('user-name-display').textContent = matchKey.charAt(0).toUpperCase() + matchKey.slice(1);
-    document.getElementById('user-avatar').textContent = matchKey.charAt(0).toUpperCase();
+    document.getElementById('user-name-display').textContent = user.charAt(0).toUpperCase() + user.slice(1);
+    document.getElementById('user-avatar').textContent = user.charAt(0).toUpperCase();
     renderSidebarHist(); renderProducts(); renderObjections(); renderHistFull();
-  } else {
+
+  } catch {
+    err.textContent = 'Erro de conexão. Tente novamente.';
     err.style.display = 'block';
-    document.getElementById('login-pass').value = '';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Entrar';
   }
 }
 document.getElementById('login-pass').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
 document.getElementById('login-user').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('login-pass').focus(); });
 
 function doLogout() {
-  currentUser = null;
+  currentUser  = null;
+  sessionToken = null;
   document.getElementById('app').style.display = 'none';
   document.getElementById('login-screen').style.display = 'flex';
   document.getElementById('login-user').value = '';
@@ -640,10 +621,10 @@ async function sendMessage() {
   const apiMessages = conv.msgs.map(m => ({ role: m.role==='user'?'user':'assistant', content: m.content }));
 
   try {
-    const res = await fetch(WEBHOOK_URL, {
+    const res = await fetch(WORKER_URL + '/chat', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ system: SYSTEM_PROMPT, messages: apiMessages })
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + sessionToken },
+      body: JSON.stringify({ messages: apiMessages }),
     });
 
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -798,13 +779,12 @@ async function refreshObj(i, type) {
   answerEl.innerHTML = '<div style="padding:4px 0;color:var(--text-muted);font-size:13px;display:flex;align-items:center;gap:8px"><div class="typing-dots"><span></span><span></span><span></span></div> Gerando nova resposta...</div>';
 
   try {
-    const res = await fetch(WEBHOOK_URL, {
+    const res = await fetch(WORKER_URL + '/chat', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + sessionToken },
       body: JSON.stringify({
-        system: SYSTEM_PROMPT,
         messages: [{ role:'user', content:`Me dê uma resposta comercial diferente, criativa e concisa para a seguinte objeção de cliente: ${q}. Responda apenas com o script de resposta, sem explicações adicionais.` }]
-      })
+      }),
     });
     if (!res.ok) throw new Error('HTTP '+res.status);
     const data = await res.json();

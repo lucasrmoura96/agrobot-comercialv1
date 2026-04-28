@@ -1,0 +1,31 @@
+# ── Não envie nada do Worker para o GitHub ──
+# Contém ferramenta com senhas em texto puro (gerar-hashes.html)
+# e o código que já está deployado na Cloudflare.
+worker/
+
+# ── Configurações locais ──
+.claude/
+
+# ── Scripts utilitários locais (PowerShell) ──
+*.ps1
+extracted_img.png
+extract_img.*
+find_robot.*
+read_obj.*
+replace_sidebar.*
+check_logo.*
+
+# ── Backups antigos ──
+index2.html
+
+# ── Base de conhecimento do RAG (não vai pro GitHub) ──
+# Os arquivos .md da base de conhecimento ficam só no Drive/Supabase.
+*.md
+!README.md
+
+# ── Dependências e ambiente ──
+node_modules/
+.env
+.env.local
+.DS_Store
+Thumbs.db
