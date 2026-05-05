@@ -636,6 +636,7 @@ async function sendMessage() {
     let reply = '';
     if (data?.content?.[0]?.text) reply = data.content[0].text;
     else if (data?.text) reply = data.text;
+    else if (data?.output) reply = data.output;
     else if (typeof data === 'string') reply = data;
     else if (data?.message) reply = data.message;
     else reply = JSON.stringify(data);
