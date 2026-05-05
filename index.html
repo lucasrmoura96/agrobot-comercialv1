@@ -634,11 +634,12 @@ async function sendMessage() {
 
     // Suporta resposta direta da Anthropic via n8n ou texto puro
     let reply = '';
-    if (data?.content?.[0]?.text) reply = data.content[0].text;
-    else if (data?.text) reply = data.text;
-    else if (data?.output) reply = data.output;
-    else if (typeof data === 'string') reply = data;
-    else if (data?.message) reply = data.message;
+    const d = Array.isArray(data) ? data[0] : data;
+    if (d?.content?.[0]?.text) reply = d.content[0].text;
+    else if (d?.text) reply = d.text;
+    else if (d?.output) reply = d.output;
+    else if (typeof d === 'string') reply = d;
+    else if (d?.message) reply = d.message;
     else reply = JSON.stringify(data);
 
     appendMsg('agent', fmt(reply));
