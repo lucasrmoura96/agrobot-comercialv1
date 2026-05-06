@@ -632,15 +632,27 @@ async function sendMessage() {
     const data = await res.json();
     removeTyping();
 
-    // Suporta resposta direta da Anthropic via n8n ou texto puro
-    let reply = '';
-    const d = Array.isArray(data) ? data[0] : data;
-    if (d?.content?.[0]?.text) reply = d.content[0].text;
-    else if (d?.text) reply = d.text;
-    else if (d?.output) reply = d.output;
-    else if (typeof d === 'string') reply = d;
-    else if (d?.message) reply = d.message;
-    else reply = JSON.stringify(data);
+    // Extração robusta: aguenta string crua, JSON-encoded duplo, array, objeto.
+    function extractReply(v) {
+      if (v == null) return null;
+      if (typeof v === 'string') {
+        const t = v.trim();
+        if (t.startsWith('[') || t.startsWith('{')) {
+          try { return extractReply(JSON.parse(t)); } catch (_) {}
+        }
+        return v;
+      }
+      if (Array.isArray(v)) return v.length ? extractReply(v[0]) : null;
+      if (typeof v === 'object') {
+        if (v.content?.[0]?.text) return v.content[0].text;
+        if (v.output   != null) return extractReply(v.output);
+        if (v.text     != null) return extractReply(v.text);
+        if (v.message  != null) return extractReply(v.message);
+        if (v.response != null) return extractReply(v.response);
+      }
+      return null;
+    }
+    let reply = extractReply(data) || JSON.stringify(data);
 
     appendMsg('agent', fmt(reply));
     conv.msgs.push({ role:'assistant', content:reply });
@@ -790,12 +802,29 @@ async function refreshObj(i, type) {
     });
     if (!res.ok) throw new Error('HTTP '+res.status);
     const data = await res.json();
-    let reply = '';
-    if (data?.content?.[0]?.text) reply = data.content[0].text;
-    else if (data?.text) reply = data.text;
-    else if (typeof data === 'string') reply = data;
-    else if (data?.message) reply = data.message;
-    else throw new Error('Resposta inválida');
+
+    // Mesma extração robusta do sendMessage
+    function extractReply(v) {
+      if (v == null) return null;
+      if (typeof v === 'string') {
+        const t = v.trim();
+        if (t.startsWith('[') || t.startsWith('{')) {
+          try { return extractReply(JSON.parse(t)); } catch (_) {}
+        }
+        return v;
+      }
+      if (Array.isArray(v)) return v.length ? extractReply(v[0]) : null;
+      if (typeof v === 'object') {
+        if (v.content?.[0]?.text) return v.content[0].text;
+        if (v.output   != null) return extractReply(v.output);
+        if (v.text     != null) return extractReply(v.text);
+        if (v.message  != null) return extractReply(v.message);
+        if (v.response != null) return extractReply(v.response);
+      }
+      return null;
+    }
+    const reply = extractReply(data);
+    if (!reply) throw new Error('Resposta inválida');
 
     const actionsHTML = prevHTML.match(/<div class="obj-actions">[\s\S]*<\/div>\s*$/)?.[0] || '';
     answerEl.innerHTML = reply + '\n        ' + actionsHTML;
